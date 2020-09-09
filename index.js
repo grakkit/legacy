@@ -385,7 +385,13 @@
                   self || (global.self = player);
                   const result = core.eval(args.join(' '));
                   self || delete global.self;
-                  core.send(player, `§7${core.output(result)}`);
+                  if (toString.apply(result) === '[foreign HostFunction]') {
+                     let input = args.slice(-1)[0].split('.').slice(-1)[0];
+                     input.endsWith(']') && (input = eval(input.replace(/.*\[/, '').slice(0, -1)));
+                     core.send(player, `§7hostFunction ${input.split(/[|;]/g)[0]}() { [native code] }`);
+                  } else {
+                     core.send(player, `§7${core.output(result)}`);
+                  }
                } catch (error) {
                   self || delete global.self;
                   core.send(player, `§c${core.error(error)}`);
@@ -502,6 +508,7 @@
                         core.send(player, '§7Updating...');
                         try {
                            core.root.file('index.js').write(core.fetch(`${master}/index.min.js`).read());
+                           core.root.file('dict').remove();
                            core.refresh();
                            core.send(player, '§7Update Complete.');
                         } catch (error) {
@@ -711,10 +718,6 @@
                      return `{ ${names.map((name) => `${name}: ${core.output(object[name], true)}`).join(', ')} }`;
                   case '[object Function]':
                      return `${object}`.replace(/\r/g, '');
-                  case '[foreign HostFunction]':
-                     let input = args.slice(-1)[0].split('.').slice(-1)[0];
-                     input.endsWith(']') && (input = eval(input.replace(/.*\[/, '').slice(0, -1)));
-                     return `hostFunction ${input.split(/[|;]/g)[0]}() { [native code] }`;
                   default:
                      return core.output(object, true);
                }
