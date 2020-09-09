@@ -432,6 +432,8 @@ export interface AbstractArrow extends Projectile {
     getItemStack (): ItemStack;
     /**Gets the knockback strength for an arrow, which is the  KnockBack level  of the bow that shot it.*/
     getKnockbackStrength (): number;
+    /**Deprecated. Use getPickupStatus() as an upstream compatible replacement for this function */
+    getPickupRule (): AbstractArrow$PickupRule;
     /**Gets the current pickup status of this arrow.*/
     getPickupStatus (): AbstractArrow$PickupStatus;
     /**Gets the number of times this arrow can pierce through an entity.*/
@@ -448,6 +450,8 @@ export interface AbstractArrow extends Projectile {
     setDamage (damage: number): void;
     /**Sets the knockback strength for an arrow.*/
     setKnockbackStrength (knockbackStrength: number): void;
+    /**Deprecated. Use setPickupStatus(PickupStatus) with AbstractArrow.PickupStatus as an upstream compatible replacement for this function */
+    setPickupRule (rule: AbstractArrow$PickupRule): void;
     /**Sets the current pickup status of this arrow.*/
     setPickupStatus (status: AbstractArrow$PickupStatus): void;
     /**Sets the number of times this arrow can pierce through an entity.*/
@@ -476,12 +480,16 @@ export interface AbstractHorse extends Vehicle, InventoryHolder, Tameable {
     getJumpStrength (): number;
     /**Gets the maximum domestication level of this horse.*/
     getMaxDomestication (): number;
+    /**Deprecated. different variants are different classes */
+    getVariant (): Horse$Variant;
     /**Sets the domestication level of this horse.*/
     setDomestication (level: number): void;
     /**Sets the jump strength of this horse.*/
     setJumpStrength (strength: number): void;
     /**Sets the maximum domestication level of this horse.*/
-    setMaxDomestication (level: number): void
+    setMaxDomestication (level: number): void;
+    /**Deprecated. you are required to spawn a different entity */
+    setVariant (variant: Horse$Variant): void
 }
 
 /**An interface to the inventory of an AbstractHorse.*/
@@ -547,16 +555,24 @@ export interface Ageable extends BlockData {
 
 /**Represents an entity that can age.*/
 export interface Ageable extends Creature {
+    /**Deprecated. see Breedable.canBreed() */
+    canBreed (): boolean;
     /**Gets the age of this mob.*/
     getAge (): number;
+    /**Deprecated. see Breedable.getAgeLock() */
+    getAgeLock (): boolean;
     /**Returns true if the mob is an adult.*/
     isAdult (): boolean;
     /**Sets the age of the mob to an adult*/
     setAdult (): void;
     /**Sets the age of this mob.*/
     setAge (age: number): void;
+    /**Deprecated. see Breedable.setAgeLock(boolean) */
+    setAgeLock (lock: boolean): void;
     /**Sets the age of the mob to a baby*/
-    setBaby (): void
+    setBaby (): void;
+    /**Deprecated. see Breedable.setBreed(boolean) */
+    setBreed (breed: boolean): void
 }
 
 /**Represents an ambient mob*/
@@ -743,16 +759,26 @@ export interface ArmorStand extends LivingEntity {
     canTick (): boolean;
     /**Returns the armor stand's body's current pose as a  EulerAngle.*/
     getBodyPose (): EulerAngle;
+    /**Deprecated. prefer EntityEquipment.getBoots() */
+    getBoots (): ItemStack;
+    /**Deprecated. prefer EntityEquipment.getChestplate() */
+    getChestplate (): ItemStack;
     /**Get the list of disabled slots*/
     getDisabledSlots (): Set<EquipmentSlot>;
     /**Returns the armor stand's head's current pose as a  EulerAngle.*/
     getHeadPose (): EulerAngle;
+    /**Deprecated. prefer EntityEquipment.getHelmet() */
+    getHelmet (): ItemStack;
     /**Returns the item the armor stand has  equip in the given equipment slot*/
     getItem (slot: EquipmentSlot): ItemStack;
+    /**Deprecated. prefer getItem(EquipmentSlot) // Paper */
+    getItemInHand (): ItemStack;
     /**Returns the armor stand's left arm's current pose as a  EulerAngle.*/
     getLeftArmPose (): EulerAngle;
     /**Returns the armor stand's left leg's current pose as a  EulerAngle.*/
     getLeftLegPose (): EulerAngle;
+    /**Deprecated. prefer EntityEquipment.getLeggings() */
+    getLeggings (): ItemStack;
     /**Returns the armor stand's right arm's current pose as a  EulerAngle.*/
     getRightArmPose (): EulerAngle;
     /**Returns the armor stand's right leg's current pose as a  EulerAngle.*/
@@ -781,20 +807,30 @@ export interface ArmorStand extends LivingEntity {
     setBasePlate (basePlate: boolean): void;
     /**Sets the armor stand's body's current pose as a  EulerAngle.*/
     setBodyPose (pose: EulerAngle): void;
+    /**Deprecated. prefer  EntityEquipment.setBoots(org.bukkit.inventory.ItemStack) */
+    setBoots (item: ItemStack): void;
     /**Sets if this armor stand can move.*/
     setCanMove (move: boolean): void;
     /**Sets if this armor stand can tick.*/
     setCanTick (tick: boolean): void;
+    /**Deprecated. prefer  EntityEquipment.setChestplate(org.bukkit.inventory.ItemStack) */
+    setChestplate (item: ItemStack): void;
     /**Set the disabled slots   This makes it so a player is unable to interact with the Armor Stand to place, remove, or replace an item in the given slot(s)  Note: Once a slot is disabled, the only way to get an item back it to break the armor stand.*/
     setDisabledSlots (...slots: EquipmentSlot[]): void;
     /**Sets the armor stand's head's current pose as a  EulerAngle.*/
     setHeadPose (pose: EulerAngle): void;
+    /**Deprecated. prefer  EntityEquipment.setHelmet(org.bukkit.inventory.ItemStack) */
+    setHelmet (item: ItemStack): void;
     /**Sets the item the armor stand has  equip in the given equipment slot*/
     setItem (slot: EquipmentSlot, item: ItemStack): void;
+    /**Deprecated. prefer  setItem(EquipmentSlot, ItemStack) // Paper */
+    setItemInHand (item: ItemStack): void;
     /**Sets the armor stand's left arm's current pose as a  EulerAngle.*/
     setLeftArmPose (pose: EulerAngle): void;
     /**Sets the armor stand's left leg's current pose as a  EulerAngle.*/
     setLeftLegPose (pose: EulerAngle): void;
+    /**Deprecated. prefer  EntityEquipment.setLeggings(org.bukkit.inventory.ItemStack) */
+    setLeggings (item: ItemStack): void;
     /**Sets whether this armor stand is a marker, meaning it has a very small  collision box.*/
     setMarker (marker: boolean): void;
     /**Sets the armor stand's right arm's current pose as a  EulerAngle.*/
@@ -943,6 +979,8 @@ export class AsyncPlayerPreLoginEvent extends Event {
     allow (): void;
     /**Disallows the player from logging in, with the given reason*/
     disallow (result: AsyncPlayerPreLoginEvent$Result, message: String): void;
+    /**Deprecated. This method uses a deprecated enum from PlayerPreLoginEvent */
+    disallow (result: PlayerPreLoginEvent$Result, message: String): void;
     /**Gets the player IP address.*/
     getAddress (): InetAddress;
     static getHandlerList (): HandlerList;
@@ -955,13 +993,17 @@ export class AsyncPlayerPreLoginEvent extends Event {
     getName (): String;
     /**Gets the PlayerProfile of the player logging in*/
     getPlayerProfile (): PlayerProfile;
+    /**Deprecated. This method uses a deprecated enum from PlayerPreLoginEvent */
+    getResult (): PlayerPreLoginEvent$Result;
     /**Gets the player's unique ID.*/
     getUniqueId (): UUID;
     /**Sets the kick message to display if getResult() != Result.ALLOWED*/
     setKickMessage (message: String): void;
     /**Sets the new result of the login, as an enum*/
     setLoginResult (result: AsyncPlayerPreLoginEvent$Result): void;
-    setPlayerProfile (profile: PlayerProfile): void
+    setPlayerProfile (profile: PlayerProfile): void;
+    /**Deprecated. This method uses a deprecated enum from PlayerPreLoginEvent */
+    setResult (result: PlayerPreLoginEvent$Result): void
 }
 
 /**Basic kick reasons for communicating to plugins*/
@@ -1205,6 +1247,8 @@ export interface Banner extends TileState {
 export interface BannerMeta extends ItemMeta {
     /**Adds a new pattern on top of the existing  patterns*/
     addPattern (pattern: Pattern): void;
+    /**Deprecated. banner color is now stored as the data value, not meta. */
+    getBaseColor (): DyeColor;
     /**Returns the pattern at the specified index*/
     getPattern (i: number): Pattern;
     /**Returns a list of patterns on this banner*/
@@ -1213,6 +1257,8 @@ export interface BannerMeta extends ItemMeta {
     numberOfPatterns (): number;
     /**Removes the pattern at the specified index*/
     removePattern (i: number): Pattern;
+    /**Deprecated. banner color is now stored as the data value, not meta. */
+    setBaseColor (color: DyeColor): void;
     /**Sets the pattern at the specified index*/
     setPattern (i: number, pattern: Pattern): void;
     /**Sets the patterns used on this banner*/
@@ -1567,6 +1613,8 @@ export interface Block extends Metadatable {
     getBoundingBox (): BoundingBox;
     /**Gets the chunk which contains this block*/
     getChunk (): Chunk;
+    /**Deprecated. Magic value */
+    getData (): number;
     /**Returns a list of items which would drop by destroying this block*/
     getDrops (): Collection<ItemStack>;
     /**Returns a list of items which would drop by destroying this block with  a specific tool*/
@@ -2016,7 +2064,9 @@ export class BlockPistonExtendEvent extends BlockPistonEvent {
     /**Get an immutable list of the blocks which will be moved by the  extending.*/
     getBlocks (): List<Block>;
     static getHandlerList (): HandlerList;
-    getHandlers (): HandlerList
+    getHandlers (): HandlerList;
+    /**Deprecated. slime blocks make the value of this method           inaccurate due to blocks being pushed at the side */
+    getLength (): number
 }
 
 /**Called when a piston retracts*/
@@ -2024,7 +2074,9 @@ export class BlockPistonRetractEvent extends BlockPistonEvent {
     /**Get an immutable list of the blocks which will be moved by the  extending.*/
     getBlocks (): List<Block>;
     static getHandlerList (): HandlerList;
-    getHandlers (): HandlerList
+    getHandlers (): HandlerList;
+    /**Deprecated.*/
+    getRetractLocation (): Location
 }
 
 /**Called when a block is placed by a player.    If a Block Place event is cancelled, the block will not be placed.*/
@@ -2128,6 +2180,8 @@ export interface BlockState extends Metadatable {
     getLocation (): Location;
     /**Stores the location of this block state in the provided Location object.*/
     getLocation (loc: Location): Location;
+    /**Deprecated. Magic value */
+    getRawData (): number;
     /**Gets the type of this block state.*/
     getType (): Material;
     /**Gets the world which contains the block represented by this block state.*/
@@ -2144,6 +2198,8 @@ export interface BlockState extends Metadatable {
     setBlockData (data: BlockData): void;
     /**Sets the metadata for this block state.*/
     setData (data: MaterialData): void;
+    /**Deprecated. Magic value */
+    setRawData (data: number): void;
     /**Sets the type of this block state.*/
     setType (type: Material): void;
     /**Attempts to update the block represented by this state, setting it to  the new values as defined by this state.*/
@@ -2176,10 +2232,26 @@ export class BlockVector extends Vector {
 
 /**Represents a boat entity.*/
 export interface Boat extends Vehicle {
+    /**Deprecated. boats are complex and many of these methods do not work correctly across multiple versions. */
+    getMaxSpeed (): number;
+    /**Deprecated. boats are complex and many of these methods do not work correctly across multiple versions. */
+    getOccupiedDeceleration (): number;
+    /**Deprecated. boats are complex and many of these methods do not work correctly across multiple versions. */
+    getUnoccupiedDeceleration (): number;
     /**Gets the wood type of the boat.*/
     getWoodType (): TreeSpecies;
+    /**Deprecated. boats are complex and many of these methods do not work correctly across multiple versions. */
+    getWorkOnLand (): boolean;
+    /**Deprecated. boats are complex and many of these methods do not work correctly across multiple versions. */
+    setMaxSpeed (speed: number): void;
+    /**Deprecated. boats are complex and many of these methods do not work correctly across multiple versions. */
+    setOccupiedDeceleration (rate: number): void;
+    /**Deprecated. boats are complex and many of these methods do not work correctly across multiple versions. */
+    setUnoccupiedDeceleration (rate: number): void;
     /**Sets the wood type of the boat.*/
-    setWoodType (species: TreeSpecies): void
+    setWoodType (species: TreeSpecies): void;
+    /**Deprecated. boats are complex and many of these methods do not work correctly across multiple versions. */
+    setWorkOnLand (workOnLand: boolean): void
 }
 
 /**Represents a book (Material.WRITABLE_BOOK or Material.WRITTEN_BOOK) that can have a title, an author, and pages.*/
@@ -2282,6 +2354,8 @@ export interface BossBar {
     getTitle (): String;
     /**Returns whether this boss bar as the passed flag set*/
     hasFlag (flag: BarFlag): boolean;
+    /**Deprecated. setVisible(boolean) */
+    hide (): void;
     /**Return if the boss bar is displayed to attached players.*/
     isVisible (): boolean;
     /**Removes all players from this boss bar*/
@@ -2299,7 +2373,9 @@ export interface BossBar {
     /**Sets the title of this boss bar*/
     setTitle (title: String): void;
     /**Set if the boss bar is displayed to attached players.*/
-    setVisible (visible: boolean): void
+    setVisible (visible: boolean): void;
+    /**Deprecated. setVisible(boolean) */
+    show (): void
 }
 
 /**A mutable axis aligned bounding box (AABB).    This basically represents a rectangular box (specified by minimum and maximum  corners) that can for example be used to describe the position and extents of  an object (such as an entity, block, or rectangular region) in 3D space. Its  edges and faces are parallel to the axes of the cartesian coordinate system.    The bounding box may be degenerate (one or more sides having the length 0).    Because bounding boxes are mutable, storing them long term may be dangerous  if they get modified later. If you want to keep around a bounding box, it may  be wise to call clone() in order to get a copy.*/
@@ -2646,6 +2722,8 @@ export class Bukkit extends Object {
     static getLogger (): Logger;
     /**Gets the specified LootTable.*/
     static getLootTable (key: NamespacedKey): LootTable;
+    /**Deprecated. Magic value */
+    static getMap (id: number): MapView;
     /**Get the maximum amount of players which can login to this server.*/
     static getMaxPlayers (): number;
     /**Gets the Messenger responsible for this server.*/
@@ -2660,6 +2738,8 @@ export class Bukkit extends Object {
     static getMotd (): String;
     /**Gets the name of this server implementation.*/
     static getName (): String;
+    /**Deprecated. Persistent storage of users should be by UUID as names are no longer              unique past a single session. */
+    static getOfflinePlayer (name: String): OfflinePlayer;
     /**Gets the player by the given UUID, regardless if they are offline or  online.*/
     static getOfflinePlayer (id: UUID): OfflinePlayer;
     /**Gets every player that has ever played on this server.*/
@@ -2721,6 +2801,8 @@ export class Bukkit extends Object {
     static getTickTimes (): number[];
     /**Gets the current server TPS*/
     static getTPS (): number[];
+    /**Deprecated.*/
+    static getUnsafe (): UnsafeValues;
     /**Gets the name of the update folder.*/
     static getUpdateFolder (): String;
     /**Gets the update folder.*/
@@ -2863,32 +2945,56 @@ export interface BukkitScheduler {
     runTask (plugin: Plugin, task: Runnable): BukkitTask;
     /**Returns a task that will run on the next server tick.*/
     runTask (plugin: Plugin, task: Consumer<BukkitTask>): void;
+    /**Deprecated. Use BukkitRunnable.runTask(Plugin) */
+    runTask (plugin: Plugin, task: BukkitRunnable): BukkitTask;
     /**Asynchronous tasks should never access any API in Bukkit.*/
     runTaskAsynchronously (plugin: Plugin, task: Runnable): BukkitTask;
     /**Asynchronous tasks should never access any API in Bukkit.*/
     runTaskAsynchronously (plugin: Plugin, task: Consumer<BukkitTask>): void;
+    /**Deprecated. Use BukkitRunnable.runTaskAsynchronously(Plugin) */
+    runTaskAsynchronously (plugin: Plugin, task: BukkitRunnable): BukkitTask;
     /**Returns a task that will run after the specified number of server  ticks.*/
     runTaskLater (plugin: Plugin, task: Runnable, delay: number): BukkitTask;
     /**Returns a task that will run after the specified number of server  ticks.*/
     runTaskLater (plugin: Plugin, task: Consumer<BukkitTask>, delay: number): void;
+    /**Deprecated. Use BukkitRunnable.runTaskLater(Plugin, long) */
+    runTaskLater (plugin: Plugin, task: BukkitRunnable, delay: number): BukkitTask;
     /**Asynchronous tasks should never access any API in Bukkit.*/
     runTaskLaterAsynchronously (plugin: Plugin, task: Runnable, delay: number): BukkitTask;
     /**Asynchronous tasks should never access any API in Bukkit.*/
     runTaskLaterAsynchronously (plugin: Plugin, task: Consumer<BukkitTask>, delay: number): void;
+    /**Deprecated. Use BukkitRunnable.runTaskLaterAsynchronously(Plugin, long) */
+    runTaskLaterAsynchronously (plugin: Plugin, task: BukkitRunnable, delay: number): BukkitTask;
     /**Returns a task that will repeatedly run until cancelled, starting after  the specified number of server ticks.*/
     runTaskTimer (plugin: Plugin, task: Runnable, delay: number, period: number): BukkitTask;
     /**Returns a task that will repeatedly run until cancelled, starting after  the specified number of server ticks.*/
     runTaskTimer (plugin: Plugin, task: Consumer<BukkitTask>, delay: number, period: number): void;
+    /**Deprecated. Use BukkitRunnable.runTaskTimer(Plugin, long, long) */
+    runTaskTimer (plugin: Plugin, task: BukkitRunnable, delay: number, period: number): BukkitTask;
     /**Asynchronous tasks should never access any API in Bukkit.*/
     runTaskTimerAsynchronously (plugin: Plugin, task: Runnable, delay: number, period: number): BukkitTask;
     /**Asynchronous tasks should never access any API in Bukkit.*/
     runTaskTimerAsynchronously (plugin: Plugin, task: Consumer<BukkitTask>, delay: number, period: number): void;
+    /**Deprecated. Use BukkitRunnable.runTaskTimerAsynchronously(Plugin, long, long) */
+    runTaskTimerAsynchronously (plugin: Plugin, task: BukkitRunnable, delay: number, period: number): BukkitTask;
+    /**Deprecated. This name is misleading, as it does not schedule "a sync"      task, but rather, "an async" task */
+    scheduleAsyncDelayedTask (plugin: Plugin, task: Runnable): number;
+    /**Deprecated. This name is misleading, as it does not schedule "a sync"      task, but rather, "an async" task */
+    scheduleAsyncDelayedTask (plugin: Plugin, task: Runnable, delay: number): number;
+    /**Deprecated. This name is misleading, as it does not schedule "a sync"      task, but rather, "an async" task */
+    scheduleAsyncRepeatingTask (plugin: Plugin, task: Runnable, delay: number, period: number): number;
     /**Schedules a once off task to occur as soon as possible.*/
     scheduleSyncDelayedTask (plugin: Plugin, task: Runnable): number;
     /**Schedules a once off task to occur after a delay.*/
     scheduleSyncDelayedTask (plugin: Plugin, task: Runnable, delay: number): number;
+    /**Deprecated. Use BukkitRunnable.runTask(Plugin) */
+    scheduleSyncDelayedTask (plugin: Plugin, task: BukkitRunnable): number;
+    /**Deprecated. Use BukkitRunnable.runTaskLater(Plugin, long) */
+    scheduleSyncDelayedTask (plugin: Plugin, task: BukkitRunnable, delay: number): number;
     /**Schedules a repeating task.*/
-    scheduleSyncRepeatingTask (plugin: Plugin, task: Runnable, delay: number, period: number): number
+    scheduleSyncRepeatingTask (plugin: Plugin, task: Runnable, delay: number, period: number): number;
+    /**Deprecated. Use BukkitRunnable.runTaskTimer(Plugin, long, long) */
+    scheduleSyncRepeatingTask (plugin: Plugin, task: BukkitRunnable, delay: number, period: number): number
 }
 
 /**Represents a task being executed by the scheduler*/
@@ -3247,16 +3353,22 @@ export class ChunkGenerator extends Object {
 
 /**Interface to biome section for chunk to be generated: initialized with  default values for world type and seed.    Custom generator is free to access and tailor values during  generateBlockSections() or generateExtBlockSections().*/
 export interface ChunkGenerator$BiomeGrid {
+    /**Deprecated. biomes are now 3-dimensional */
+    getBiome (x: number, z: number): Biome;
     /**Get biome at x, z within chunk being generated*/
     getBiome (x: number, y: number, z: number): Biome;
     /**Set biome at x, z within chunk being generated*/
-    setBiome (x: number, y: number, z: number, bio: Biome): void
+    setBiome (x: number, y: number, z: number, bio: Biome): void;
+    /**Deprecated. biomes are now 3-dimensional */
+    setBiome (x: number, z: number, bio: Biome): void
 }
 
 /**Data for a Chunk.*/
 export interface ChunkGenerator$ChunkData {
     /**Get the type and data of the block at x, y, z.*/
     getBlockData (x: number, y: number, z: number): BlockData;
+    /**Deprecated. Uses magic values */
+    getData (x: number, y: number, z: number): number;
     /**Get the maximum height for the chunk.*/
     getMaxHeight (): number;
     /**Get the type of the block at x, y, z.*/
@@ -3295,6 +3407,8 @@ export class ChunkPopulateEvent extends ChunkEvent {
 export interface ChunkSnapshot {
     /**Tests if this snapshot contains the specified block.*/
     contains (block: BlockData): boolean;
+    /**Deprecated. biomes are now 3-dimensional */
+    getBiome (x: number, z: number): Biome;
     /**Get biome at given coordinates*/
     getBiome (x: number, y: number, z: number): Biome;
     /**Get block data for block at corresponding coordinate in the chunk*/
@@ -3307,8 +3421,12 @@ export interface ChunkSnapshot {
     getBlockType (x: number, y: number, z: number): Material;
     /**Get world full time when chunk snapshot was captured*/
     getCaptureFullTime (): number;
+    /**Deprecated. Magic value */
+    getData (x: number, y: number, z: number): number;
     /**Gets the highest non-air coordinate at the given coordinates*/
     getHighestBlockYAt (x: number, z: number): number;
+    /**Deprecated. biomes are now 3-dimensional */
+    getRawBiomeTemperature (x: number, z: number): number;
     /**Get raw biome temperature at given coordinates*/
     getRawBiomeTemperature (x: number, y: number, z: number): number;
     /**Gets name of the world containing this chunk*/
@@ -4061,6 +4179,8 @@ export interface Creature extends Mob {
 
 /**Represents a captured state of a creature spawner.*/
 export interface CreatureSpawner extends TileState {
+    /**Deprecated. magic value, use getSpawnedType(). */
+    getCreatureTypeName (): String;
     /**Get the spawner's delay.*/
     getDelay (): number;
     /**Set the new maximum amount of similar entities that are allowed to be  within spawning range of this spawner.*/
@@ -4081,6 +4201,8 @@ export interface CreatureSpawner extends TileState {
     isActivated (): boolean;
     /**Resets the spawn delay timer within the min/max range*/
     resetTimer (): void;
+    /**Deprecated. magic value, use  setSpawnedType(org.bukkit.entity.EntityType). */
+    setCreatureTypeByName (creatureType: String): void;
     /**Set the spawner's delay.*/
     setDelay (delay: number): void;
     /**Set the maximum number of similar entities that are allowed to be within  spawning range of this spawner.*/
@@ -4289,10 +4411,16 @@ export interface Damageable extends Entity {
     getAbsorptionAmount (): number;
     /**Gets the entity's health from 0 to getMaxHealth(), where 0 is dead.*/
     getHealth (): number;
+    /**Deprecated. use Attribute.GENERIC_MAX_HEALTH. */
+    getMaxHealth (): number;
+    /**Deprecated. use Attribute.GENERIC_MAX_HEALTH. */
+    resetMaxHealth (): void;
     /**Sets the entity's absorption amount.*/
     setAbsorptionAmount (amount: number): void;
     /**Sets the entity's health from 0 to getMaxHealth(), where 0 is  dead.*/
-    setHealth (health: number): void
+    setHealth (health: number): void;
+    /**Deprecated. use Attribute.GENERIC_MAX_HEALTH. */
+    setMaxHealth (health: number): void
 }
 
 /**Represents an item that has durability and can take damage.*/
@@ -4693,17 +4821,23 @@ export class Enchantment extends Object implements Keyed {
     equals (obj: Object): boolean;
     /**Gets the Enchantment at the specified key*/
     static getByKey (key: NamespacedKey): Enchantment;
+    /**Deprecated. enchantments are badly named, use getByKey(org.bukkit.NamespacedKey). */
+    static getByName (name: String): Enchantment;
     /**Gets the type of ItemStack that may fit this Enchantment.*/
     getItemTarget (): EnchantmentTarget;
     /**Return the namespaced identifier for this object.*/
     getKey (): NamespacedKey;
     /**Gets the maximum level that this Enchantment may become.*/
     getMaxLevel (): number;
+    /**Deprecated. enchantments are badly named, use getKey(). */
+    getName (): String;
     /**Gets the level that this Enchantment should start at*/
     getStartLevel (): number;
     hashCode (): number;
     /**Checks if this is accepting Enchantment registrations.*/
     static isAcceptingRegistrations (): boolean;
+    /**Deprecated. cursed enchantments are no longer special. */
+    isCursed (): boolean;
     /**Checks if this enchantment is a treasure enchantment.*/
     isTreasure (): boolean;
     /**Registers an enchantment with the given ID and object.*/
@@ -5075,6 +5209,8 @@ export interface Entity extends Metadatable, CommandSender, Nameable, Persistent
     getNearbyEntities (x: number, y: number, z: number): List<Entity>;
     /**Gets the location where this entity originates from.*/
     getOrigin (): Location;
+    /**Deprecated. entities may have multiple passengers, use  getPassengers() */
+    getPassenger (): Entity;
     /**Gets a list of passengers of this vehicle.*/
     getPassengers (): List<Entity>;
     /**Returns the reaction of the entity when moved by a piston.*/
@@ -5161,6 +5297,8 @@ export interface Entity extends Metadatable, CommandSender, Nameable, Persistent
     setInvulnerable (flag: boolean): void;
     /**Record the last EntityDamageEvent inflicted on this entity*/
     setLastDamageCause (event: EntityDamageEvent): void;
+    /**Deprecated. entities may have multiple passengers, use  getPassengers() */
+    setPassenger (passenger: Entity): boolean;
     /**Sets whether or not the entity gets persisted.*/
     setPersistent (persistent: boolean): void;
     /**Sets the period of time (in ticks) before this entity can use a portal.*/
@@ -5623,6 +5761,10 @@ export interface EntityEquipment {
     getHolder (): Entity;
     /**Gets the ItemStack at the given equipment slot in the inventory.*/
     getItem (slot: EquipmentSlot): ItemStack;
+    /**Deprecated. entities can duel wield now use the methods for the       specific hand instead */
+    getItemInHand (): ItemStack;
+    /**Deprecated. entities can duel wield now use the methods for the specific  hand instead */
+    getItemInHandDropChance (): number;
     /**Gets a copy of the item the entity is currently holding  in their main hand.*/
     getItemInMainHand (): ItemStack;
     /**Gets the chance of the main hand item being dropped upon this creature's  death.*/
@@ -5651,6 +5793,10 @@ export interface EntityEquipment {
     setHelmetDropChance (chance: number): void;
     /**Stores the ItemStack at the given equipment slot in the inventory.*/
     setItem (slot: EquipmentSlot, item: ItemStack): void;
+    /**Deprecated. entities can duel wield now use the methods for the       specific hand instead */
+    setItemInHand (stack: ItemStack): void;
+    /**Deprecated. entities can duel wield now use the methods for the specific  hand instead */
+    setItemInHandDropChance (chance: number): void;
     /**Sets the item the entity is holding in their main hand.*/
     setItemInMainHand (item: ItemStack): void;
     /**Sets the chance of the item this creature is currently holding in their  main hand being dropped upon this creature's death.*/
@@ -5957,10 +6103,14 @@ export class EntityResurrectEvent extends EntityEvent implements Cancellable {
 
 /**Called when a LivingEntity shoots a bow firing an arrow*/
 export class EntityShootBowEvent extends EntityEvent implements Cancellable {
+    /**Deprecated.*/
+    getArrowItem (): ItemStack;
     /**Gets the bow ItemStack used to fire the arrow.*/
     getBow (): ItemStack;
     /**Get the ItemStack to be consumed in this event (if any).*/
     getConsumable (): ItemStack;
+    /**Deprecated.*/
+    getConsumeArrow (): boolean;
     /**Returns the Entity involved in this event*/
     getEntity (): LivingEntity;
     /**Gets the force the arrow was launched with*/
@@ -5975,6 +6125,8 @@ export class EntityShootBowEvent extends EntityEvent implements Cancellable {
     isCancelled (): boolean;
     /**Sets the cancellation state of this event.*/
     setCancelled (cancel: boolean): void;
+    /**Deprecated.*/
+    setConsumeArrow (consumeArrow: boolean): void;
     /**Set whether or not the consumable item should be consumed in this event.*/
     setConsumeItem (consumeItem: boolean): void;
     /**Replaces the projectile which will be launched*/
@@ -6431,7 +6583,11 @@ export class EventPriority extends Enum<EventPriority> {
 
 /**Represents an Evoker "Illager".*/
 export interface Evoker extends Spellcaster {
+    /**Deprecated. future versions of Minecraft have additional spell casting  entities. */
+    getCurrentSpell (): Evoker$Spell;
     getWololoTarget (): Sheep;
+    /**Deprecated. future versions of Minecraft have additional spell casting  entities. */
+    setCurrentSpell (spell: Evoker$Spell): void;
     /**Set the sheep to be the target of the wololo spell, or null to clear.*/
     setWololoTarget (sheep: Sheep): void
 }
@@ -6480,6 +6636,8 @@ export interface ExperienceOrb extends Entity {
     getSpawnReason (): ExperienceOrb$SpawnReason;
     /**If this experience orb was triggered to be spawned by  an entity such as a player, due to events such as killing entity,  breaking blocks, smelting in a furnace, etc, this will return the UUID  of the entity that triggered this orb to drop.*/
     getTriggerEntityId (): UUID;
+    /**Deprecated. Use getSpawnReason() == EXP_BOTTLE */
+    isFromBottle (): boolean;
     /**Sets how much experience is contained within this orb*/
     setExperience (value: number): void
 }
@@ -6583,6 +6741,10 @@ export interface FallingBlock extends Entity {
     getBlockData (): BlockData;
     /**Get if the falling block will break into an item if it cannot be placed*/
     getDropItem (): boolean;
+    /**Deprecated. use getBlockData() */
+    getMaterial (): Material;
+    /**Deprecated. replaced by Entity.getOrigin() */
+    getSourceLoc (): Location;
     /**Set if the falling block will break into an item if it cannot be placed*/
     setDropItem (drop: boolean): void;
     /**Set the HurtEntities state of this block.*/
@@ -6806,7 +6968,10 @@ export interface Fish extends WaterMob {
 
 /**Represents a fishing hook.*/
 export interface FishHook extends Projectile {
-
+    /**Deprecated. has no effect in newer Minecraft versions */
+    getBiteChance (): number;
+    /**Deprecated. has no effect in newer Minecraft versions */
+    setBiteChance (chance: number): void
 }
 
 /**A FixedMetadataValue is a special case metadata item that contains the same  value forever after initialization. Invalidating a FixedMetadataValue has  no effect.    This class extends LazyMetadataValue for historical reasons, even though it  overrides all the implementation methods. it is possible that in the future  that the inheritance hierarchy may change.*/
@@ -7008,6 +7173,8 @@ export class FurnaceRecipe extends CookingRecipe<FurnaceRecipe> {
     setInput (input: Material): FurnaceRecipe;
     /**Sets the input of this furnace recipe.*/
     setInput (input: MaterialData): FurnaceRecipe;
+    /**Deprecated. Magic value */
+    setInput (input: Material, data: number): FurnaceRecipe;
     /**Sets the input of this cooking recipe.*/
     setInputChoice (input: RecipeChoice): FurnaceRecipe
 }
@@ -7224,7 +7391,10 @@ export class GS4QueryEvent$QueryType extends Enum<GS4QueryEvent$QueryType> {
 }
 
 export interface Guardian extends Monster {
-
+    /**Deprecated. should check if instance of ElderGuardian. */
+    isElder (): boolean;
+    /**Deprecated. Must spawn a new ElderGuardian. */
+    setElder (shouldBeElder: boolean): void
 }
 
 /**A list of event handlers, stored per-event. Based on lahwran's fevents.*/
@@ -7441,6 +7611,10 @@ export interface Horse extends AbstractHorse {
     getInventory (): HorseInventory;
     /**Gets the horse's style.*/
     getStyle (): Horse$Style;
+    /**Deprecated. see ChestedHorse */
+    isCarryingChest (): boolean;
+    /**Deprecated. see ChestedHorse */
+    setCarryingChest (chest: boolean): void;
     /**Sets the horse's color.*/
     setColor (color: Horse$Color): void;
     /**Sets the style of this horse.*/
@@ -7493,7 +7667,11 @@ export class HorseJumpEvent extends EntityEvent implements Cancellable {
     /**Gets the power of the jump.*/
     getPower (): number;
     /**Gets the cancellation state of this event.*/
-    isCancelled (): boolean
+    isCancelled (): boolean;
+    /**Deprecated. horse jumping was moved client side. */
+    setCancelled (cancel: boolean): void;
+    /**Deprecated. horse jumping was moved client side. */
+    setPower (power: number): void
 }
 
 /**Represents a human entity, such as an NPC or a player*/
@@ -7524,6 +7702,8 @@ export interface HumanEntity extends LivingEntity, AnimalTamer, InventoryHolder 
     getGameMode (): GameMode;
     /**Get the player's inventory.*/
     getInventory (): PlayerInventory;
+    /**Deprecated. Humans may now dual wield in their off hand, use explicit  methods in PlayerInventory. */
+    getItemInHand (): ItemStack;
     /**Returns the ItemStack currently on your cursor, can be empty.*/
     getItemOnCursor (): ItemStack;
     /**Gets the player's selected main hand*/
@@ -7534,6 +7714,10 @@ export interface HumanEntity extends LivingEntity, AnimalTamer, InventoryHolder 
     getOpenInventory (): InventoryView;
     /**Gets the Location of the player's bed, null if they have not slept  in one.*/
     getPotentialBedLocation (): Location;
+    /**Deprecated. There are currently no well defined semantics regarding  serialized entities in Bukkit. */
+    getShoulderEntityLeft (): Entity;
+    /**Deprecated. There are currently no well defined semantics regarding  serialized entities in Bukkit. */
+    getShoulderEntityRight (): Entity;
     /**Get the sleep ticks of the player.*/
     getSleepTicks (): number;
     /**Check whether a cooldown is active on the specified material.*/
@@ -7566,8 +7750,14 @@ export interface HumanEntity extends LivingEntity, AnimalTamer, InventoryHolder 
     setCooldown (material: Material, ticks: number): void;
     /**Sets this human's current GameMode*/
     setGameMode (mode: GameMode): void;
+    /**Deprecated. Humans may now dual wield in their off hand, use explicit  methods in PlayerInventory. */
+    setItemInHand (item: ItemStack): void;
     /**Sets the item to the given ItemStack, this will replace whatever the  user was moving.*/
     setItemOnCursor (item: ItemStack): void;
+    /**Deprecated. There are currently no well defined semantics regarding  serialized entities in Bukkit. */
+    setShoulderEntityLeft (entity: Entity): void;
+    /**Deprecated. There are currently no well defined semantics regarding  serialized entities in Bukkit. */
+    setShoulderEntityRight (entity: Entity): void;
     /**If the player currently has an inventory window open, this method will  set a property of that window, such as the state of a progress bar.*/
     setWindowProperty (prop: InventoryView$Property, value: number): boolean;
     /**Attempts to make the entity sleep at the given location.*/
@@ -7837,7 +8027,9 @@ export class InventoryClickEvent extends InventoryInteractEvent {
     /**Gets whether the ClickType for this event indicates that the key was  pressed down when the click was made.*/
     isShiftClick (): boolean;
     /**Sets the ItemStack currently in the clicked slot.*/
-    setCurrentItem (stack: ItemStack): void
+    setCurrentItem (stack: ItemStack): void;
+    /**Deprecated. This changes the ItemStack in their hand before any      calculations are applied to the Inventory, which has a tendency to      create inconsistencies between the Player and the server, and to      make unexpected changes in the behavior of the clicked Inventory. */
+    setCursor (stack: ItemStack): void
 }
 
 /**Represents a player related inventory event*/
@@ -8201,7 +8393,9 @@ export interface ItemFactory {
     /**This method checks the item meta to confirm that it is applicable (no  data lost if applied) to the specified ItemStack.*/
     isApplicable (meta: ItemMeta, stack: ItemStack): boolean;
     /**This method checks the item meta to confirm that it is applicable (no  data lost if applied) to the specified Material.*/
-    isApplicable (meta: ItemMeta, material: Material): boolean
+    isApplicable (meta: ItemMeta, material: Material): boolean;
+    /**Deprecated. for internal use only */
+    updateMaterial (meta: ItemMeta, material: Material): Material
 }
 
 /**A ItemFlag can hide some Attributes from ItemStacks*/
@@ -8272,8 +8466,14 @@ export interface ItemMeta extends Cloneable, ConfigurationSerializable, Persiste
     getAttributeModifiers (attribute: Attribute): Collection<AttributeModifier>;
     /**Return an immutable copy of all Attributes and their  AttributeModifiers for a given EquipmentSlot.  Any AttributeModifier that does have have a given  EquipmentSlot will be returned.*/
     getAttributeModifiers (slot: EquipmentSlot): Multimap<Attribute,AttributeModifier>;
+    /**Deprecated. Minecraft does not limit this to the material enum, Use getDestroyableKeys() as a replacement */
+    getCanDestroy (): Set<Material>;
+    /**Deprecated. Minecraft does not limit this to the material enum, Use getPlaceableKeys() as a replacement */
+    getCanPlaceOn (): Set<Material>;
     /**Gets the custom model data that is set.*/
     getCustomModelData (): number;
+    /**Deprecated. this API part has been replaced by the PersistentDataHolder API. */
+    getCustomTagContainer (): CustomItemTagContainer;
     /**Gets the collection of namespaced keys that the item can destroy in GameMode.ADVENTURE*/
     getDestroyableKeys (): Set<Namespaced>;
     /**Gets the display name that is set.*/
@@ -8330,6 +8530,10 @@ export interface ItemMeta extends Cloneable, ConfigurationSerializable, Persiste
     removeItemFlags (...itemFlags: ItemFlag[]): void;
     /**Set all Attributes and their AttributeModifiers.*/
     setAttributeModifiers (attributeModifiers: Multimap<Attribute,AttributeModifier>): void;
+    /**Deprecated. Minecraft does not limit this to the material enum, Use setDestroyableKeys(Collection) as a replacement */
+    setCanDestroy (canDestroy: Set<Material>): void;
+    /**Deprecated. Minecraft does not limit this to the material enum, Use setPlaceableKeys(Collection) as a replacement */
+    setCanPlaceOn (canPlaceOn: Set<Material>): void;
     /**Sets the custom model data.*/
     setCustomModelData (data: Integer): void;
     /**Sets the collection of namespaced keys that the item can destroy in GameMode.ADVENTURE*/
@@ -8347,7 +8551,9 @@ export interface ItemMeta extends Cloneable, ConfigurationSerializable, Persiste
     /**Sets the set of namespaced keys that the item can be placed on in GameMode.ADVENTURE*/
     setPlaceableKeys (canPlaceOn: Collection<Namespaced>): void;
     /**Sets the unbreakable tag.*/
-    setUnbreakable (unbreakable: boolean): void
+    setUnbreakable (unbreakable: boolean): void;
+    /**Deprecated. internal use only */
+    setVersion (version: number): void
 }
 
 /**Called when an item is spawned into a world*/
@@ -8390,6 +8596,8 @@ export class ItemStack extends Object implements Cloneable, ConfigurationSeriali
     getAmount (): number;
     /**Gets the MaterialData for this stack of items*/
     getData (): MaterialData;
+    /**Deprecated. see setDurability(short) */
+    getDurability (): number;
     /**Gets the level of the specified enchantment on this item stack*/
     getEnchantmentLevel (ench: Enchantment): number;
     /**Gets a map containing all enchantments and their levels on this item.*/
@@ -8426,6 +8634,8 @@ export class ItemStack extends Object implements Cloneable, ConfigurationSeriali
     setAmount (amount: number): void;
     /**Sets the MaterialData for this stack of items*/
     setData (data: MaterialData): void;
+    /**Deprecated. durability is now part of ItemMeta. */
+    setDurability (durability: number): void;
     /**Set the ItemMeta of this ItemStack.*/
     setItemMeta (itemMeta: ItemMeta): boolean;
     /**Sets the lore for this item.*/
@@ -8812,6 +9022,8 @@ export interface Listener {
 export interface LivingEntity extends Attributable, Damageable, ProjectileSource {
     /**Adds the given PotionEffect to the living entity.*/
     addPotionEffect (effect: PotionEffect): boolean;
+    /**Deprecated. no need to force since multiple effects of the same type are  now supported. */
+    addPotionEffect (effect: PotionEffect, force: boolean): boolean;
     /**Attempts to add all of the given PotionEffect to the living  entity.*/
     addPotionEffects (effects: Collection<PotionEffect>): boolean;
     /**Makes this entity attack the given entity with a melee attack.*/
@@ -9562,6 +9774,8 @@ export class MapCursor extends Object {
     getCaption (): String;
     /**Get the direction of this cursor.*/
     getDirection (): number;
+    /**Deprecated. Magic value */
+    getRawType (): number;
     /**Get the type of this cursor.*/
     getType (): MapCursor$Type;
     /**Get the X position of this cursor.*/
@@ -9574,6 +9788,8 @@ export class MapCursor extends Object {
     setCaption (caption: String): void;
     /**Set the direction of this cursor.*/
     setDirection (direction: number): void;
+    /**Deprecated. Magic value */
+    setRawType (type: number): void;
     /**Set the type of this cursor.*/
     setType (type: MapCursor$Type): void;
     /**Set the visibility status of this cursor.*/
@@ -9619,6 +9835,12 @@ export class MapCursor$Type extends Enum<MapCursor$Type> {
 export class MapCursorCollection extends Object {
     /**Add a cursor to the collection.*/
     addCursor (x: number, y: number, direction: number): MapCursor;
+    /**Deprecated. Magic value */
+    addCursor (x: number, y: number, direction: number, type: number): MapCursor;
+    /**Deprecated. Magic value */
+    addCursor (x: number, y: number, direction: number, type: number, visible: boolean): MapCursor;
+    /**Deprecated. Magic value */
+    addCursor (x: number, y: number, direction: number, type: number, visible: boolean, caption: String): MapCursor;
     /**Add a cursor to the collection.*/
     addCursor (cursor: MapCursor): MapCursor;
     /**Get a cursor from this collection.*/
@@ -9668,12 +9890,16 @@ export interface MapMeta extends ItemMeta {
     getColor (): Color;
     /**Gets the location name that is set.*/
     getLocationName (): String;
+    /**Deprecated. These methods are poor API: They rely on the caller to pass  in an only an integer property, and have poorly defined implementation  behavior if that integer is not a valid map (the current implementation  for example will generate a new map with a different ID). */
+    getMapId (): number;
     /**Gets the map view that is associated with this map item.*/
     getMapView (): MapView;
     /**Checks for existence of a map color.*/
     hasColor (): boolean;
     /**Checks for existence of a location name.*/
     hasLocationName (): boolean;
+    /**Deprecated. These methods are poor API: They rely on the caller to pass  in an only an integer property, and have poorly defined implementation  behavior if that integer is not a valid map (the current implementation  for example will generate a new map with a different ID). */
+    hasMapId (): boolean;
     /**Checks for existence of an associated map.*/
     hasMapView (): boolean;
     /**Checks to see if this map is scaling.*/
@@ -9682,6 +9908,8 @@ export interface MapMeta extends ItemMeta {
     setColor (color: Color): void;
     /**Sets the location name.*/
     setLocationName (name: String): void;
+    /**Deprecated. These methods are poor API: They rely on the caller to pass  in an only an integer property, and have poorly defined implementation  behavior if that integer is not a valid map (the current implementation  for example will generate a new map with a different ID). */
+    setMapId (id: number): void;
     /**Sets the associated map.*/
     setMapView (map: MapView): void;
     /**Sets if this map is scaling or not.*/
@@ -9690,6 +9918,14 @@ export interface MapMeta extends ItemMeta {
 
 /**Represents the palette that map items use.    These fields are hee base color ranges. Each entry corresponds to four  colors of varying shades with values entry to entry + 3.*/
 export class MapPalette extends Object {
+    /**Deprecated. Magic value */
+    static getColor (index: number): Color;
+    /**Deprecated. Magic value */
+    static imageToBytes (image: Image): number[];
+    /**Deprecated. Magic value */
+    static matchColor (r: number, g: number, b: number): number;
+    /**Deprecated. Magic value */
+    static matchColor (color: Color): number;
     /**Resize an image to 128x128.*/
     static resizeImage (image: Image): BufferedImage
 }
@@ -12931,6 +13167,8 @@ export class NamespacedKey extends Object implements Namespaced {
     hashCode (): number;
     /**Get a key in the Minecraft namespace.*/
     static minecraft (key: String): NamespacedKey;
+    /**Deprecated. should never be used by plugins, for internal use only!! */
+    static randomKey (): NamespacedKey;
     toString (): String
 }
 
@@ -12944,6 +13182,8 @@ export class NamespacedTag extends Object implements Namespaced {
     hashCode (): number;
     /**Get a key in the Minecraft namespace.*/
     static minecraft (key: String): NamespacedTag;
+    /**Deprecated. should never be used by plugins, for internal use only!! */
+    static randomKey (): NamespacedTag;
     toString (): String
 }
 
@@ -13001,6 +13241,8 @@ export class Note extends Object {
     /**Creates a new note for a flat tone, such as A-flat.*/
     static flat (octave: number, tone: Note$Tone): Note;
     flattened (): Note;
+    /**Deprecated. Magic value */
+    getId (): number;
     /**Returns the octave of this note.*/
     getOctave (): number;
     /**Returns the tone of this note.*/
@@ -13050,7 +13292,11 @@ export class NotePlayEvent extends BlockEvent implements Cancellable {
     /**Gets the cancellation state of this event.*/
     isCancelled (): boolean;
     /**Sets the cancellation state of this event.*/
-    setCancelled (cancel: boolean): void
+    setCancelled (cancel: boolean): void;
+    /**Deprecated. no effect on newer Minecraft versions */
+    setInstrument (instrument: Instrument): void;
+    /**Deprecated. no effect on newer Minecraft versions */
+    setNote (note: Note): void
 }
 
 /**Represents a non-player character*/
@@ -13129,6 +13375,8 @@ export interface Objective {
     getRenderType (): RenderType;
     /**Gets an entry's Score for an Objective on this Scoreboard.*/
     getScore (entry: String): Score;
+    /**Deprecated. Scoreboards can contain entries that aren't players */
+    getScore (player: OfflinePlayer): Score;
     /**Gets the scoreboard to which this objective is attached.*/
     getScoreboard (): Scoreboard;
     /**Gets if the objective's scores can be modified directly by a plugin.*/
@@ -13215,6 +13463,8 @@ export interface OfflinePlayer extends ServerOperator, AnimalTamer, Configuratio
     getFirstPlayed (): number;
     /**Gets the last date and time that this player logged into the server.*/
     getLastLogin (): number;
+    /**Deprecated. The API contract is ambiguous and the implementation may or may not return the correct value given this API ambiguity. */
+    getLastPlayed (): number;
     /**Gets the last date and time that this player was seen on the server.*/
     getLastSeen (): number;
     /**Returns the name of this player*/
@@ -13883,10 +14133,14 @@ export interface Piglin extends PiglinAbstract {
 export interface PiglinAbstract extends Monster, Ageable {
     /**Gets the amount of ticks until this entity will be converted to a  Zombified Piglin.*/
     getConversionTime (): number;
+    /**Deprecated. see Ageable.isAdult() */
+    isBaby (): boolean;
     /**Get if this entity is in the process of converting to a Zombified Piglin.*/
     isConverting (): boolean;
     /**Gets whether the piglin is immune to zombification.*/
     isImmuneToZombification (): boolean;
+    /**Deprecated. see Ageable.setBaby() and Ageable.setAdult() */
+    setBaby (flag: boolean): void;
     /**Sets the amount of ticks until this entity will be converted to a  Zombified Piglin.*/
     setConversionTime (time: number): void;
     /**Sets whether the piglin is immune to zombification.*/
@@ -13904,6 +14158,8 @@ export class PigZapEvent extends EntityZapEvent implements Cancellable {
     getEntity (): Pig;
     /**Gets the bolt which is striking the pig.*/
     getLightning (): LightningStrike;
+    /**Deprecated. use EntityTransformEvent.getTransformedEntity() */
+    getPigZombie (): PigZombie;
     /**Gets the cancellation state of this event.*/
     isCancelled (): boolean;
     /**Sets the cancellation state of this event.*/
@@ -14064,6 +14320,8 @@ export interface Player extends HumanEntity, Conversable, OfflinePlayer, PluginM
     getPlayerTimeOffset (): number;
     /**Returns the type of weather the player is currently experiencing.*/
     getPlayerWeather (): WeatherType;
+    /**Deprecated. This is no longer sent from the client and will always be null */
+    getResourcePackHash (): String;
     getResourcePackStatus (): PlayerResourcePackStatusEvent$Status;
     /**Gets the players current saturation level.*/
     getSaturation (): number;
@@ -14084,6 +14342,8 @@ export interface Player extends HumanEntity, Conversable, OfflinePlayer, PluginM
     /**Gives the player the amount of experience levels specified.*/
     giveExpLevels (amount: number): void;
     hasResourcePack (): boolean;
+    /**Deprecated. see hidePlayer(Plugin, Player) */
+    hidePlayer (player: Player): void;
     /**Hides a player from this player*/
     hidePlayer (plugin: Plugin, player: Player): void;
     /**Hide any title that is currently visible to the player*/
@@ -14092,6 +14352,8 @@ export interface Player extends HumanEntity, Conversable, OfflinePlayer, PluginM
     isFlying (): boolean;
     /**Gets if the client is displayed a 'scaled' health, that is, health on a  scale from 0-getHealthScale().*/
     isHealthScaled (): boolean;
+    /**Deprecated. This value is controlled only by the client and is therefore  unreliable and vulnerable to spoofing and/or desync depending on the  context/time which it is accessed */
+    isOnGround (): boolean;
     /**Returns true if the player's time is relative to the server time,  otherwise the player's time is absolute and will not change its current  time unless done so with setPlayerTime().*/
     isPlayerTimeRelative (): boolean;
     /**Returns whether the player is sleeping ignored.*/
@@ -14108,8 +14370,12 @@ export interface Player extends HumanEntity, Conversable, OfflinePlayer, PluginM
     openBook (book: ItemStack): void;
     /**Makes the player perform the given command*/
     performCommand (command: String): boolean;
+    /**Deprecated. Magic value */
+    playEffect (loc: Location, effect: Effect, data: number): void;
     /**Plays an effect to just this player.*/
     playEffect <T>(loc: Location, effect: Effect, data: T): void;
+    /**Deprecated. Magic value */
+    playNote (loc: Location, instrument: number, note: number): void;
     /**Play a note for a player at a location.*/
     playNote (loc: Location, instrument: Instrument, note: Note): void;
     /**Play a sound for a player at the location.*/
@@ -14138,6 +14404,10 @@ export interface Player extends HumanEntity, Conversable, OfflinePlayer, PluginM
     sendActionBar (...message: BaseComponent[]): void;
     /**Send a block change.*/
     sendBlockChange (loc: Location, block: BlockData): void;
+    /**Deprecated. Magic value */
+    sendBlockChange (loc: Location, material: Material, data: number): void;
+    /**Deprecated. Magic value */
+    sendChunkChange (loc: Location, sx: number, sy: number, sz: number, data: number[]): boolean;
     /**Send an experience change.*/
     sendExperienceChange (progress: number): void;
     /**Send an experience change.*/
@@ -14148,6 +14418,8 @@ export interface Player extends HumanEntity, Conversable, OfflinePlayer, PluginM
     sendMessage (component: BaseComponent): void;
     /**Sends an array of components as a single message to the player*/
     sendMessage (...components: BaseComponent[]): void;
+    /**Deprecated. This is unlikely the API you want to use. */
+    sendMessage (position: ChatMessageType, ...components: BaseComponent[]): void;
     /**Sends this sender a message raw*/
     sendRawMessage (message: String): void;
     /**Send a sign change.*/
@@ -14156,6 +14428,8 @@ export interface Player extends HumanEntity, Conversable, OfflinePlayer, PluginM
     sendSignChange (loc: Location, lines: String[], dyeColor: DyeColor): void;
     /**Show the title to the player, overriding any previously displayed title.*/
     sendTitle (title: Title): void;
+    /**Deprecated. API behavior subject to change */
+    sendTitle (title: String, subtitle: String): void;
     /**Sends a title and a subtitle message to the player.*/
     sendTitle (title: String, subtitle: String, fadeIn: number, stay: number, fadeOut: number): void;
     /**Set whether the player can affect mob spawning*/
@@ -14204,6 +14478,8 @@ export interface Player extends HumanEntity, Conversable, OfflinePlayer, PluginM
     setPlayerTime (time: number, relative: boolean): void;
     /**Sets the type of weather the player will see.*/
     setPlayerWeather (type: WeatherType): void;
+    /**Deprecated. use setResourcePack(String, String) */
+    setResourcePack (url: String): void;
     /**Request that the player's client download and switch resource packs.*/
     setResourcePack (url: String, hash: number[]): void;
     /**Request that the player's client download and switch resource packs.*/
@@ -14220,14 +14496,32 @@ export interface Player extends HumanEntity, Conversable, OfflinePlayer, PluginM
     setSpectatorTarget (entity: Entity): void;
     /**Sets whether the player is sprinting or not.*/
     setSprinting (sprinting: boolean): void;
+    /**Deprecated. Use updateTitle(Title) */
+    setSubtitle (subtitle: BaseComponent): void;
+    /**Deprecated. Use updateTitle(Title) */
+    setSubtitle (subtitle: BaseComponent[]): void;
+    /**Deprecated. Minecraft no longer uses textures packs. */
+    setTexturePack (url: String): void;
+    /**Deprecated. Use updateTitle(Title) */
+    setTitleTimes (fadeInTicks: number, stayTicks: number, fadeOutTicks: number): void;
     /**Sets the players current experience points.*/
     setTotalExperience (exp: number): void;
     /**Sets the view distance for this player*/
     setViewDistance (viewDistance: number): void;
     /**Sets the speed at which a client will walk.*/
     setWalkSpeed (value: number): void;
+    /**Deprecated. see showPlayer(Plugin, Player) */
+    showPlayer (player: Player): void;
     /**Allows this player to see a player that was previously hidden.*/
     showPlayer (plugin: Plugin, player: Player): void;
+    /**Deprecated. Use sendTitle(Title) or updateTitle(Title) */
+    showTitle (title: BaseComponent): void;
+    /**Deprecated. Use sendTitle(Title) or updateTitle(Title) */
+    showTitle (title: BaseComponent[]): void;
+    /**Deprecated. Use sendTitle(Title) or updateTitle(Title) */
+    showTitle (title: BaseComponent[], subtitle: BaseComponent[], fadeInTicks: number, stayTicks: number, fadeOutTicks: number): void;
+    /**Deprecated. Use sendTitle(Title) or updateTitle(Title) */
+    showTitle (title: BaseComponent, subtitle: BaseComponent, fadeInTicks: number, stayTicks: number, fadeOutTicks: number): void;
     /**Spawns the particle (the number of times specified by count)  at the target location.*/
     spawnParticle (particle: Particle, x: number, y: number, z: number, count: number): void;
     /**Spawns the particle (the number of times specified by count)  at the target location.*/
@@ -14270,6 +14564,8 @@ export interface Player extends HumanEntity, Conversable, OfflinePlayer, PluginM
 }
 
 export class Player$Spigot extends Entity$Spigot {
+    /**Deprecated. see LivingEntity.isCollidable() */
+    getCollidesWithEntities (): boolean;
     /**Gets all players hidden with Player.hidePlayer(org.bukkit.entity.Player).*/
     getHiddenPlayers (): Set<Player>;
     getPing (): number;
@@ -14280,7 +14576,13 @@ export class Player$Spigot extends Entity$Spigot {
     /**Sends this sender a chat component.*/
     sendMessage (component: BaseComponent): void;
     /**Sends an array of components as a single message to the sender.*/
-    sendMessage (...components: BaseComponent[]): void
+    sendMessage (...components: BaseComponent[]): void;
+    /**Deprecated. This is unlikely the API you want to use. */
+    sendMessage (position: ChatMessageType, component: BaseComponent): void;
+    /**Deprecated. This is unlikely the API you want to use. */
+    sendMessage (position: ChatMessageType, ...components: BaseComponent[]): void;
+    /**Deprecated. LivingEntity.setCollidable(boolean) */
+    setCollidesWithEntities (collides: boolean): void
 }
 
 /**Called when a player is granted a criteria in an advancement.*/
@@ -14515,6 +14817,8 @@ export class PlayerCommandPreprocessEvent extends PlayerEvent implements Cancell
     getHandlers (): HandlerList;
     /**Gets the command that the player is attempting to send.*/
     getMessage (): String;
+    /**Deprecated. This method is provided for backward compatibility with no      guarantee to the effect of viewing or modifying the set. */
+    getRecipients (): Set<Player>;
     /**Gets the cancellation state of this event.*/
     isCancelled (): boolean;
     /**Sets the cancellation state of this event.*/
@@ -14599,6 +14903,8 @@ export class PlayerEditBookEvent extends PlayerEvent implements Cancellable {
     getNewBookMeta (): BookMeta;
     /**Gets the book meta currently on the book.*/
     getPreviousBookMeta (): BookMeta;
+    /**Deprecated. books may be signed from off hand */
+    getSlot (): number;
     /**Gets the cancellation state of this event.*/
     isCancelled (): boolean;
     /**Gets whether or not the book is being signed.*/
@@ -14810,6 +15116,8 @@ export class PlayerInteractEvent extends PlayerEvent implements Cancellable {
     hasItem (): boolean;
     /**Convenience method to inform the user whether this was a block  placement event.*/
     isBlockInHand (): boolean;
+    /**Deprecated. This event has two possible cancellation states, one for  useInteractedBlock() and one for useItemInHand(). */
+    isCancelled (): boolean;
     /**Sets the cancellation state of this event.*/
     setCancelled (cancel: boolean): void;
     setUseInteractedBlock (useInteractedBlock: Event$Result): void;
@@ -14838,6 +15146,8 @@ export interface PlayerInventory extends Inventory {
     getHolder (): HumanEntity;
     /**Gets the ItemStack at the given equipment slot in the inventory.*/
     getItem (slot: EquipmentSlot): ItemStack;
+    /**Deprecated. players can duel wield now use the methods for the       specific hand instead */
+    getItemInHand (): ItemStack;
     /**Gets a copy of the item the player is currently holding  in their main hand.*/
     getItemInMainHand (): ItemStack;
     /**Gets a copy of the item the player is currently holding  in their off hand.*/
@@ -14860,6 +15170,8 @@ export interface PlayerInventory extends Inventory {
     setItem (index: number, item: ItemStack): void;
     /**Stores the ItemStack at the given equipment slot in the inventory.*/
     setItem (slot: EquipmentSlot, item: ItemStack): void;
+    /**Deprecated. players can duel wield now use the methods for the       specific hand instead */
+    setItemInHand (stack: ItemStack): void;
     /**Sets the item the player is holding in their main hand.*/
     setItemInMainHand (item: ItemStack): void;
     /**Sets the item the player is holding in their off hand.*/
@@ -15274,6 +15586,8 @@ export class PlayerRegisterChannelEvent extends PlayerChannelEvent {
 export class PlayerResourcePackStatusEvent extends PlayerEvent {
     static getHandlerList (): HandlerList;
     getHandlers (): HandlerList;
+    /**Deprecated.*/
+    getHash (): String;
     /**Gets the status of this pack.*/
     getStatus (): PlayerResourcePackStatusEvent$Status
 }
@@ -15635,6 +15949,8 @@ export class PluginDescriptionFile extends Object {
     getAuthors (): List<String>;
     /**Gives a set of every PluginAwareness for a plugin.*/
     getAwareness (): Set<PluginAwareness>;
+    /**Deprecated. unused */
+    getClassLoaderOf (): String;
     /**Gives the map of command-name to command-properties.*/
     getCommands (): Map<String,Map<String,Object>>;
     /**Gives the list of contributors for the plugin.*/
@@ -15661,6 +15977,8 @@ export class PluginDescriptionFile extends Object {
     getPrefix (): String;
     /**Gives the list of other plugin APIs which this plugin provides.*/
     getProvides (): List<String>;
+    /**Deprecated. Internal use */
+    getRawName (): String;
     /**Gives a list of other plugins that the plugin requires for full  functionality.*/
     getSoftDepend (): List<String>;
     /**Gives the version of the plugin.*/
@@ -15895,7 +16213,9 @@ export interface PotionBrewer {
     /**Creates a PotionEffect from the given PotionEffectType,  applying duration modifiers and checks.*/
     createEffect (potion: PotionEffectType, duration: number, amplifier: number): PotionEffect;
     /**Returns a collection of PotionEffect that would be applied from  a potion with the given type.*/
-    getEffects (type: PotionType, upgraded: boolean, extended: boolean): Collection<PotionEffect>
+    getEffects (type: PotionType, upgraded: boolean, extended: boolean): Collection<PotionEffect>;
+    /**Deprecated. Non-Functional */
+    getEffectsFromDamage (damage: number): Collection<PotionEffect>
 }
 
 export class PotionData extends Object {
@@ -15916,6 +16236,8 @@ export class PotionEffect extends Object implements ConfigurationSerializable {
     equals (obj: Object): boolean;
     /**Returns the amplifier of this effect.*/
     getAmplifier (): number;
+    /**Deprecated. color is not part of potion effects */
+    getColor (): Color;
     /**Returns the duration (in ticks) that this effect will run for when  applied to a LivingEntity.*/
     getDuration (): number;
     /**Returns the PotionEffectType of this effect.*/
@@ -15941,10 +16263,16 @@ export class PotionEffectType extends Object {
     /**Creates a PotionEffect from this PotionEffectType, applying duration  modifiers and checks.*/
     createEffect (duration: number, amplifier: number): PotionEffect;
     equals (obj: Object): boolean;
+    /**Deprecated. Magic value */
+    static getById (id: number): PotionEffectType;
     /**Gets the effect type specified by the given name.*/
     static getByName (name: String): PotionEffectType;
     /**Returns the color of this effect type.*/
     getColor (): Color;
+    /**Deprecated. unused, always 1.0 */
+    getDurationModifier (): number;
+    /**Deprecated. Magic value */
+    getId (): number;
     /**Returns the name of this effect type.*/
     getName (): String;
     hashCode (): number;
@@ -15996,7 +16324,9 @@ export interface PotionMeta extends ItemMeta {
     /**Sets the underlying potion data*/
     setBasePotionData (data: PotionData): void;
     /**Sets the potion color.*/
-    setColor (color: Color): void
+    setColor (color: Color): void;
+    /**Deprecated. use PotionType(org.bukkit.potion.PotionEffectType, boolean, boolean) */
+    setMainEffect (type: PotionEffectType): boolean
 }
 
 /**Called when a splash potion hits an area*/
@@ -16126,6 +16456,8 @@ export class PrepareItemEnchantEvent extends InventoryEvent implements Cancellab
     getEnchanter (): Player;
     /**Get enchantment bonus in effect - corresponds to number of bookshelves*/
     getEnchantmentBonus (): number;
+    /**Deprecated. Use getOffers() instead of this method */
+    getExpLevelCostsOffered (): number[];
     static getHandlerList (): HandlerList;
     getHandlers (): HandlerList;
     /**Gets the item to be enchanted.*/
@@ -16479,6 +16811,8 @@ export interface Recipe {
 /**Represents a potential item match within a recipe. All choices within a  recipe must be satisfied for it to be craftable.   This class is not legal for implementation by plugins!*/
 export interface RecipeChoice extends Predicate<ItemStack>, Cloneable {
     clone (): RecipeChoice;
+    /**Deprecated. for compatability only */
+    getItemStack (): ItemStack;
     test (itemStack: ItemStack): boolean
 }
 
@@ -16743,6 +17077,8 @@ export interface Score {
     getEntry (): String;
     /**Gets the Objective being tracked by this Score*/
     getObjective (): Objective;
+    /**Deprecated. Scoreboards can contain entries that aren't players */
+    getPlayer (): OfflinePlayer;
     /**Gets the current score*/
     getScore (): number;
     /**Gets the scoreboard for the associated objective.*/
@@ -16769,12 +17105,20 @@ export interface Scoreboard {
     getObjectives (): Set<Objective>;
     /**Gets all Objectives of a Criteria on the Scoreboard*/
     getObjectivesByCriteria (criteria: String): Set<Objective>;
+    /**Deprecated. Scoreboards can contain entries that aren't players */
+    getPlayers (): Set<OfflinePlayer>;
+    /**Deprecated. Scoreboards can contain entries that aren't players */
+    getPlayerTeam (player: OfflinePlayer): Team;
     /**Gets all scores for an entry on this Scoreboard*/
     getScores (entry: String): Set<Score>;
+    /**Deprecated. Scoreboards can contain entries that aren't players */
+    getScores (player: OfflinePlayer): Set<Score>;
     /**Gets a Team by name on this Scoreboard*/
     getTeam (teamName: String): Team;
     /**Gets all teams on this Scoreboard*/
     getTeams (): Set<Team>;
+    /**Deprecated. a displayName should be explicitly specified */
+    registerNewObjective (name: String, criteria: String): Objective;
     /**Registers an Objective on this Scoreboard*/
     registerNewObjective (name: String, criteria: String, displayName: String): Objective;
     /**Registers an Objective on this Scoreboard*/
@@ -16782,7 +17126,9 @@ export interface Scoreboard {
     /**Registers a Team on this Scoreboard*/
     registerNewTeam (name: String): Team;
     /**Removes all scores for an entry on this Scoreboard*/
-    resetScores (entry: String): void
+    resetScores (entry: String): void;
+    /**Deprecated. Scoreboards can contain entries that aren't players */
+    resetScores (player: OfflinePlayer): void
 }
 
 /**Manager of Scoreboards*/
@@ -16919,6 +17265,8 @@ export interface Server extends PluginMessageRecipient {
     getLogger (): Logger;
     /**Gets the specified LootTable.*/
     getLootTable (key: NamespacedKey): LootTable;
+    /**Deprecated. Magic value */
+    getMap (id: number): MapView;
     /**Get the maximum amount of players which can login to this server.*/
     getMaxPlayers (): number;
     /**Gets the Messenger responsible for this server.*/
@@ -16933,6 +17281,8 @@ export interface Server extends PluginMessageRecipient {
     getMotd (): String;
     /**Gets the name of this server implementation.*/
     getName (): String;
+    /**Deprecated. Persistent storage of users should be by UUID as names are no longer              unique past a single session. */
+    getOfflinePlayer (name: String): OfflinePlayer;
     /**Gets the player by the given UUID, regardless if they are offline or  online.*/
     getOfflinePlayer (id: UUID): OfflinePlayer;
     /**Gets every player that has ever played on this server.*/
@@ -16992,6 +17342,8 @@ export interface Server extends PluginMessageRecipient {
     getTickTimes (): number[];
     /**Gets the current server TPS*/
     getTPS (): number[];
+    /**Deprecated.*/
+    getUnsafe (): UnsafeValues;
     /**Gets the name of the update folder.*/
     getUpdateFolder (): String;
     /**Gets the update folder.*/
@@ -17307,6 +17659,8 @@ export class ShapedRecipe extends Object implements Recipe, Keyed {
     setIngredient (key: char, ingredient: Material): ShapedRecipe;
     /**Sets the material that a character in the recipe shape refers to.*/
     setIngredient (key: char, ingredient: MaterialData): ShapedRecipe;
+    /**Deprecated. Magic value */
+    setIngredient (key: char, ingredient: Material, raw: number): ShapedRecipe;
     /**Set the shape of this recipe to the specified rows.*/
     shape (...shape: String[]): ShapedRecipe
 }
@@ -17318,12 +17672,16 @@ export class ShapelessRecipe extends Object implements Recipe, Keyed {
     addIngredient (count: number, ingredient: Material): ShapelessRecipe;
     /**Adds multiples of the specified ingredient.*/
     addIngredient (count: number, ingredient: MaterialData): ShapelessRecipe;
+    /**Deprecated. Magic value */
+    addIngredient (count: number, ingredient: Material, rawdata: number): ShapelessRecipe;
     addIngredient (item: ItemStack): ShapelessRecipe;
     addIngredient (ingredient: RecipeChoice): ShapelessRecipe;
     /**Adds the specified ingredient.*/
     addIngredient (ingredient: Material): ShapelessRecipe;
     /**Adds the specified ingredient.*/
     addIngredient (ingredient: MaterialData): ShapelessRecipe;
+    /**Deprecated. Magic value */
+    addIngredient (ingredient: Material, rawdata: number): ShapelessRecipe;
     getChoiceList (): List<RecipeChoice>;
     /**Get the group of this recipe.*/
     getGroup (): String;
@@ -17338,6 +17696,8 @@ export class ShapelessRecipe extends Object implements Recipe, Keyed {
     removeIngredient (count: number, ingredient: Material): ShapelessRecipe;
     /**Removes multiple instances of an ingredient from the list.*/
     removeIngredient (count: number, ingredient: MaterialData): ShapelessRecipe;
+    /**Deprecated. Magic value */
+    removeIngredient (count: number, ingredient: Material, rawdata: number): ShapelessRecipe;
     removeIngredient (item: ItemStack): ShapelessRecipe;
     /**Removes an ingredient from the list.*/
     removeIngredient (ingredient: RecipeChoice): ShapelessRecipe;
@@ -17345,6 +17705,8 @@ export class ShapelessRecipe extends Object implements Recipe, Keyed {
     removeIngredient (ingredient: Material): ShapelessRecipe;
     /**Removes an ingredient from the list.*/
     removeIngredient (ingredient: MaterialData): ShapelessRecipe;
+    /**Deprecated. Magic value */
+    removeIngredient (ingredient: Material, rawdata: number): ShapelessRecipe;
     /**Set the group of this recipe.*/
     setGroup (group: String): void
 }
@@ -17469,11 +17831,15 @@ export class SimpleCommandMap extends Object implements CommandMap {
 export class SimplePluginManager extends Object implements PluginManager {
     /**Adds a Permission to this plugin manager.*/
     addPermission (perm: Permission): void;
+    /**Deprecated.*/
+    addPermission (perm: Permission, dirty: boolean): void;
     /**Calls an event with the given details.*/
     callEvent (event: Event): void;
     clearPermissions (): void;
     /**Disables and removes all plugins*/
     clearPlugins (): void;
+    /**Deprecated.*/
+    dirtyPermissibles (): void;
     /**Disables the specified plugin*/
     disablePlugin (plugin: Plugin): void;
     /**Disables the specified plugin*/
@@ -17613,7 +17979,10 @@ export interface SizedFireball extends Fireball {
 
 /**Represents a Skeleton.*/
 export interface Skeleton extends Monster, RangedEntity {
-
+    /**Deprecated. should check what class instance this is */
+    getSkeletonType (): Skeleton$SkeletonType;
+    /**Deprecated. Must spawn a new subtype variant */
+    setSkeletonType (type: Skeleton$SkeletonType): void
 }
 
 /**Represents a SkeletonHorse - variant of AbstractHorse.*/
@@ -17648,27 +18017,43 @@ export interface SkinParts {
 
 /**Represents a captured state of a skull block.*/
 export interface Skull extends TileState {
+    /**Deprecated. See getOwningPlayer(). */
+    getOwner (): String;
     /**Get the player which owns the skull.*/
     getOwningPlayer (): OfflinePlayer;
     /**If the skull has an owner, per hasOwner(), return the owners PlayerProfile*/
     getPlayerProfile (): PlayerProfile;
+    /**Deprecated. use BlockData */
+    getRotation (): BlockFace;
+    /**Deprecated. check Material instead */
+    getSkullType (): SkullType;
     /**Checks to see if the skull has an owner*/
     hasOwner (): boolean;
+    /**Deprecated. see setOwningPlayer(org.bukkit.OfflinePlayer). */
+    setOwner (name: String): boolean;
     /**Set the player which owns the skull.*/
     setOwningPlayer (player: OfflinePlayer): void;
     /**Sets this skull to use the supplied Player Profile, which can include textures already prefilled.*/
-    setPlayerProfile (profile: PlayerProfile): void
+    setPlayerProfile (profile: PlayerProfile): void;
+    /**Deprecated. use BlockData */
+    setRotation (rotation: BlockFace): void;
+    /**Deprecated. check Material instead */
+    setSkullType (skullType: SkullType): void
 }
 
 /**Represents a skull that can have an owner.*/
 export interface SkullMeta extends ItemMeta {
     clone (): SkullMeta;
+    /**Deprecated. see setOwningPlayer(org.bukkit.OfflinePlayer). */
+    getOwner (): String;
     /**Gets the owner of the skull.*/
     getOwningPlayer (): OfflinePlayer;
     /**If the skull has an owner, per hasOwner(), return the owners PlayerProfile*/
     getPlayerProfile (): PlayerProfile;
     /**Checks to see if the skull has an owner.*/
     hasOwner (): boolean;
+    /**Deprecated. see setOwningPlayer(org.bukkit.OfflinePlayer). */
+    setOwner (owner: String): boolean;
     /**Sets the owner of the skull.*/
     setOwningPlayer (owner: OfflinePlayer): boolean;
     /**Sets this skull to use the supplied Player Profile, which can include textures already prefilled.*/
@@ -18855,7 +19240,11 @@ export class SpawnChangeEvent extends WorldEvent {
 
 /**Represents a spawn egg and it's spawned type.*/
 export interface SpawnEggMeta extends ItemMeta {
-    clone (): SpawnEggMeta
+    clone (): SpawnEggMeta;
+    /**Deprecated. different types are different items */
+    getSpawnedType (): EntityType;
+    /**Deprecated. different types are different items */
+    setSpawnedType (type: EntityType): void
 }
 
 /**Represents a Minecart with an entity spawner inside it.*/
@@ -18984,6 +19373,10 @@ export class StandardMessenger extends Object implements Messenger {
     unregisterOutgoingPluginChannel (plugin: Plugin): void;
     /**Unregisters the specific plugin from the requested outgoing plugin  channel, no longer allowing it to send messages through that channel to  any clients.*/
     unregisterOutgoingPluginChannel (plugin: Plugin, channel: String): void;
+    /**Deprecated. not an API method */
+    static validateAndCorrectChannel (channel: String): String;
+    /**Deprecated. not an API method */
+    static validateChannel (channel: String): void;
     /**Validates the input of a Plugin Message, ensuring the arguments are all  valid.*/
     static validatePluginMessage (messenger: Messenger, source: Plugin, channel: String, message: number[]): void
 }
@@ -19329,7 +19722,10 @@ export interface SuspiciousStewMeta extends ItemMeta {
 }
 
 export interface Switch extends Directional, FaceAttachable, Powerable {
-
+    /**Deprecated. use FaceAttachable.getAttachedFace() */
+    getFace (): Switch$Face;
+    /**Deprecated. use FaceAttachable.getAttachedFace() */
+    setFace (face: Switch$Face): void
 }
 
 /**Called when a CommandSender of any description (ie: player or  console) attempts to tab complete.    Note that due to client changes, if the sender is a Player, this event will  only begin to fire once command arguments are specified, not commands  themselves. Plugins wishing to remove commands from tab completion are  advised to ensure the client does not have permission for the relevant  commands, or use PlayerCommandSendEvent.*/
@@ -19412,6 +19808,8 @@ export class TargetEntityInfo extends Object {
 export interface Team {
     /**This puts the specified entry onto this team for the scoreboard.*/
     addEntry (entry: String): void;
+    /**Deprecated. Teams can contain entries that aren't players */
+    addPlayer (player: OfflinePlayer): void;
     /**Gets the team friendly fire state*/
     allowFriendlyFire (): boolean;
     /**Gets the team's ability to see invisible teammates.*/
@@ -19424,8 +19822,12 @@ export interface Team {
     getEntries (): Set<String>;
     /**Gets the name of this Team*/
     getName (): String;
+    /**Deprecated. see getOption(org.bukkit.scoreboard.Team.Option) */
+    getNameTagVisibility (): NameTagVisibility;
     /**Get an option for this team*/
     getOption (option: Team$Option): Team$OptionStatus;
+    /**Deprecated. Teams can contain entries that aren't players */
+    getPlayers (): Set<OfflinePlayer>;
     /**Gets the prefix prepended to the display of entries on this team.*/
     getPrefix (): String;
     /**Gets the Scoreboard to which this team is attached*/
@@ -19436,8 +19838,12 @@ export interface Team {
     getSuffix (): String;
     /**Checks to see if the specified entry is a member of this team.*/
     hasEntry (entry: String): boolean;
+    /**Deprecated. Teams can contain entries that aren't players */
+    hasPlayer (player: OfflinePlayer): boolean;
     /**Removes the entry from this team.*/
     removeEntry (entry: String): boolean;
+    /**Deprecated. Teams can contain entries that aren't players */
+    removePlayer (player: OfflinePlayer): boolean;
     /**Sets the team friendly fire state*/
     setAllowFriendlyFire (enabled: boolean): void;
     /**Sets the team's ability to see invisible teammates.*/
@@ -19446,6 +19852,8 @@ export interface Team {
     setColor (color: ChatColor): void;
     /**Sets the name displayed to entries for this team*/
     setDisplayName (displayName: String): void;
+    /**Deprecated. see  setOption(org.bukkit.scoreboard.Team.Option, org.bukkit.scoreboard.Team.OptionStatus) */
+    setNameTagVisibility (visibility: NameTagVisibility): void;
     /**Set an option for this team*/
     setOption (option: Team$Option, status: Team$OptionStatus): void;
     /**Sets the prefix prepended to the display of entries on this team.*/
@@ -19602,6 +20010,8 @@ export class TimeSkipEvent$SkipReason extends Enum<TimeSkipEvent$SkipReason> {
 
 /**Provides an ability to time sections of code within the Minecraft Server*/
 export interface Timing extends AutoCloseable {
+    /**Deprecated. Doesn't do anything - Removed */
+    abort (): void;
     close (): void;
     /**Used internally to get the actual backing Handler in the case of delegated Handlers*/
     getTimingHandler (): co$aikar$timings$TimingHandler;
@@ -19728,6 +20138,8 @@ export interface TNTPrimed extends Explosive {
     getFuseTicks (): number;
     /**Gets the source of this primed TNT.*/
     getSource (): Entity;
+    /**Deprecated. replaced by Entity.getOrigin() */
+    getSourceLoc (): Location;
     /**Set the number of ticks until the TNT blows up after being primed.*/
     setFuseTicks (fuseTicks: number): void
 }
@@ -20688,6 +21100,8 @@ export interface World extends PluginMessageRecipient, Metadatable {
     getAmbientSpawnLimit (): number;
     /**Gets the limit for number of animals that can spawn in a chunk in this  world*/
     getAnimalSpawnLimit (): number;
+    /**Deprecated. biomes are now 3-dimensional */
+    getBiome (x: number, z: number): Biome;
     /**Gets the biome for the given block coordinates.*/
     getBiome (x: number, y: number, z: number): Biome;
     /**Gets the Block at the given coordinates*/
@@ -20713,6 +21127,8 @@ export interface World extends PluginMessageRecipient, Metadatable {
     getChunkAtAsync (x: number, z: number, gen: boolean, cb: Consumer<Chunk>): void;
     /**Requests a Chunk to be loaded at the given coordinates   This method makes no guarantee on how fast the chunk will load,  and will return the chunk to the callback at a later time.*/
     getChunkAtAsync (x: number, z: number, cb: Consumer<Chunk>): void;
+    /**Deprecated. Use either the Future or the Consumer based methods */
+    getChunkAtAsync (x: number, z: number, cb: World$ChunkLoadCallback): void;
     /**Requests a Chunk to be loaded at the given coordinates   This method makes no guarantee on how fast the chunk will load,  and will return the chunk to the callback at a later time.*/
     getChunkAtAsync (block: Block): CompletableFuture<Chunk>;
     /**Requests a Chunk to be loaded at the given coordinates   This method makes no guarantee on how fast the chunk will load,  and will return the chunk to the callback at a later time.*/
@@ -20721,6 +21137,8 @@ export interface World extends PluginMessageRecipient, Metadatable {
     getChunkAtAsync (block: Block, gen: boolean, cb: Consumer<Chunk>): void;
     /**Requests Chunk to be loaded that contains the given Block   This method makes no guarantee on how fast the chunk will load,  and will return the chunk to the callback at a later time.*/
     getChunkAtAsync (block: Block, cb: Consumer<Chunk>): void;
+    /**Deprecated. Use either the Future or the Consumer based methods */
+    getChunkAtAsync (block: Block, cb: World$ChunkLoadCallback): void;
     /**Requests a Chunk to be loaded at the given coordinates   This method makes no guarantee on how fast the chunk will load,  and will return the chunk to the callback at a later time.*/
     getChunkAtAsync (loc: Location): CompletableFuture<Chunk>;
     /**Requests a Chunk to be loaded at the given coordinates   This method makes no guarantee on how fast the chunk will load,  and will return the chunk to the callback at a later time.*/
@@ -20729,6 +21147,8 @@ export interface World extends PluginMessageRecipient, Metadatable {
     getChunkAtAsync (loc: Location, gen: boolean, cb: Consumer<Chunk>): void;
     /**Requests a Chunk to be loaded at the given Location   This method makes no guarantee on how fast the chunk will load,  and will return the chunk to the callback at a later time.*/
     getChunkAtAsync (loc: Location, cb: Consumer<Chunk>): void;
+    /**Deprecated. Use either the Future or the Consumer based methods */
+    getChunkAtAsync (loc: Location, cb: World$ChunkLoadCallback): void;
     /**Requests a Chunk to be loaded at the given coordinates   This method makes no guarantee on how fast the chunk will load,  and will return the chunk to the callback at a later time.*/
     getChunkAtAsyncUrgently (x: number, z: number): CompletableFuture<Chunk>;
     /**Requests a Chunk to be loaded at the given coordinates   This method makes no guarantee on how fast the chunk will load,  and will return the chunk to the callback at a later time.*/
@@ -20750,6 +21170,8 @@ export interface World extends PluginMessageRecipient, Metadatable {
     getEntities (): List<Entity>;
     /**Get a collection of all entities in this World matching the given  class/interface*/
     getEntitiesByClass <T extends Entity>(cls: Class<T>): Collection<T>;
+    /**Deprecated.*/
+    getEntitiesByClass <T extends Entity>(...classes: Class<T>[]): Collection<T>;
     /**Get a collection of all entities in this World matching any of the  given classes/interfaces*/
     getEntitiesByClasses (...classes: Class<X>[]): Collection<Entity>;
     /**Gets an entity in this world by its UUID*/
@@ -20765,26 +21187,38 @@ export interface World extends PluginMessageRecipient, Metadatable {
     getGameRuleDefault <T>(rule: GameRule<T>): T;
     /**Get an array containing the names of all the GameRules.*/
     getGameRules (): String[];
+    /**Deprecated. use getGameRuleValue(GameRule) instead */
+    getGameRuleValue (rule: String): String;
     /**Get the current value for a given GameRule.*/
     getGameRuleValue <T>(rule: GameRule<T>): T;
     /**Gets the chunk generator for this world*/
     getGenerator (): ChunkGenerator;
     /**Gets the highest non-empty (impassable) block at the given coordinates.*/
     getHighestBlockAt (x: number, z: number): Block;
+    /**Deprecated. Upstream has added support for this, use getHighestBlockAt(int, int, HeightMap) */
+    getHighestBlockAt (x: number, z: number, heightmap: HeightmapType): Block;
     /**Gets the highest block corresponding to the HeightMap at the  given coordinates.*/
     getHighestBlockAt (x: number, z: number, heightMap: HeightMap): Block;
     /**Gets the highest non-empty (impassable) block at the given coordinates.*/
     getHighestBlockAt (location: Location): Block;
+    /**Deprecated. Upstream has added support for this, use getHighestBlockAt(Location, HeightMap) */
+    getHighestBlockAt (location: Location, heightmap: HeightmapType): Block;
     /**Gets the highest block corresponding to the HeightMap at the  given coordinates.*/
     getHighestBlockAt (location: Location, heightMap: HeightMap): Block;
     /**Gets the highest non-empty (impassable) coordinate at the given  coordinates.*/
     getHighestBlockYAt (x: number, z: number): number;
+    /**Deprecated. Upstream has added support for this, use getHighestBlockYAt(int, int, HeightMap) */
+    getHighestBlockYAt (x: number, z: number, heightmap: HeightmapType): number;
     /**Gets the highest coordinate corresponding to the HeightMap at the  given coordinates.*/
     getHighestBlockYAt (x: number, z: number, heightMap: HeightMap): number;
     /**Gets the highest non-empty (impassable) coordinate at the given  Location.*/
     getHighestBlockYAt (location: Location): number;
+    /**Deprecated. Upstream has added support for this, use getHighestBlockYAt(Location, HeightMap) */
+    getHighestBlockYAt (location: Location, heightmap: HeightmapType): number;
     /**Gets the highest coordinate corresponding to the HeightMap at the  given Location.*/
     getHighestBlockYAt (location: Location, heightMap: HeightMap): number;
+    /**Deprecated. biomes are now 3-dimensional */
+    getHumidity (x: number, z: number): number;
     /**Gets the humidity for the given block coordinates.*/
     getHumidity (x: number, y: number, z: number): number;
     /**Gets whether the world's spawn area should be kept loaded into memory  or not.*/
@@ -20867,6 +21301,8 @@ export interface World extends PluginMessageRecipient, Metadatable {
     getSeed (): number;
     /**Gets the default spawn Location of this world*/
     getSpawnLocation (): Location;
+    /**Deprecated. biomes are now 3-dimensional */
+    getTemperature (x: number, z: number): number;
     /**Gets the temperature for the given block coordinates.*/
     getTemperature (x: number, y: number, z: number): number;
     /**Get the thundering duration.*/
@@ -20899,6 +21335,8 @@ export interface World extends PluginMessageRecipient, Metadatable {
     getWorldBorder (): WorldBorder;
     /**Gets the folder of this world on disk.*/
     getWorldFolder (): File;
+    /**Deprecated. world type is only used to select the default word generation  settings and is not stored in Vanilla worlds, making it impossible for  this method to always return the correct value. */
+    getWorldType (): WorldType;
     /**Returns whether the world has an ongoing storm.*/
     hasStorm (): boolean;
     /**Gets whether or not the world will automatically save*/
@@ -20909,6 +21347,8 @@ export interface World extends PluginMessageRecipient, Metadatable {
     isChunkGenerated (x: number, z: number): boolean;
     /**Checks if a Chunk has been generated at the specified chunk key,  which is the X and Z packed into a long.*/
     isChunkGenerated (chunkKey: number): boolean;
+    /**Deprecated. This method was added to facilitate chunk garbage collection. */
+    isChunkInUse (x: number, z: number): boolean;
     /**Checks if the Chunk at the specified coordinates is loaded*/
     isChunkLoaded (x: number, z: number): boolean;
     /**Checks if the specified Chunk is loaded*/
@@ -20963,6 +21403,10 @@ export interface World extends PluginMessageRecipient, Metadatable {
     rayTraceEntities (start: Location, direction: Vector, maxDistance: number, raySize: number, filter: Predicate<Entity>): RayTraceResult;
     /**Performs a ray trace that checks for entity collisions.*/
     rayTraceEntities (start: Location, direction: Vector, maxDistance: number, filter: Predicate<Entity>): RayTraceResult;
+    /**Deprecated. This method is not guaranteed to work suitably across all client implementations. */
+    refreshChunk (x: number, z: number): boolean;
+    /**Deprecated. regenerating a single chunk is not likely to produce the same  chunk as before as terrain decoration may be spread across chunks. */
+    regenerateChunk (x: number, z: number): boolean;
     /**Removes the specified plugin's ticket for the specified chunk*/
     removePluginChunkTicket (x: number, z: number, plugin: Plugin): boolean;
     /**Removes all plugin tickets for the specified plugin*/
@@ -20977,6 +21421,8 @@ export interface World extends PluginMessageRecipient, Metadatable {
     setAutoSave (value: boolean): void;
     /**Sets the biome for the given block coordinates*/
     setBiome (x: number, y: number, z: number, bio: Biome): void;
+    /**Deprecated. biomes are now 3-dimensional */
+    setBiome (x: number, z: number, bio: Biome): void;
     /**Sets whether the chunk at the specified chunk coordinates is force  loaded.*/
     setChunkForceLoaded (x: number, z: number, forced: boolean): void;
     /**Sets the Difficulty of the world.*/
@@ -20985,6 +21431,8 @@ export interface World extends PluginMessageRecipient, Metadatable {
     setFullTime (time: number): void;
     /**Set the given GameRule's new value.*/
     setGameRule <T>(rule: GameRule<T>, newValue: T): boolean;
+    /**Deprecated. use setGameRule(GameRule, Object) instead. */
+    setGameRuleValue (rule: String, value: String): boolean;
     /**Sets whether the world is hardcore or not.*/
     setHardcore (hardcore: boolean): void;
     /**Sets whether the world's spawn area should be kept loaded into memory  or not.*/
@@ -21048,6 +21496,8 @@ export interface World extends PluginMessageRecipient, Metadatable {
     spawnFallingBlock (location: Location, data: BlockData): FallingBlock;
     /**Spawn a FallingBlock entity at the given Location of  the specified Material.*/
     spawnFallingBlock (location: Location, data: MaterialData): FallingBlock;
+    /**Deprecated. Magic value */
+    spawnFallingBlock (location: Location, material: Material, data: number): FallingBlock;
     /**Spawns the particle (the number of times specified by count)  at the target location.*/
     spawnParticle (particle: Particle, x: number, y: number, z: number, count: number): void;
     /**Spawns the particle (the number of times specified by count)  at the target location.*/
@@ -21125,6 +21575,8 @@ export interface WorldBorder {
     getWarningDistance (): number;
     /**Gets the current border warning time in seconds.*/
     getWarningTime (): number;
+    /**Deprecated. use isInside(Location) for an upstream compatible replacement */
+    isInBounds (location: Location): boolean;
     /**Check if the specified location is inside this border.*/
     isInside (location: Location): boolean;
     /**Resets the border to default values.*/
@@ -21286,27 +21738,44 @@ export class YamlRepresenter extends Representer {
 
 /**Represents a Zoglin.*/
 export interface Zoglin extends Monster, Ageable {
-
+    /**Deprecated. see Ageable.isAdult() */
+    isBaby (): boolean;
+    /**Deprecated. see Ageable.setBaby() and Ageable.setAdult() */
+    setBaby (flag: boolean): void
 }
 
 /**Represents a Zombie.*/
 export interface Zombie extends Monster, Ageable {
     /**Gets the amount of ticks until this entity will be converted to a Drowned  as a result of being underwater.*/
     getConversionTime (): number;
+    /**Deprecated.*/
+    getVillagerProfession (): Villager$Profession;
     /**Check if zombie has arms raised*/
     isArmsRaised (): boolean;
+    /**Deprecated. see Ageable.isAdult() */
+    isBaby (): boolean;
     /**Get if this entity is in the process of converting to a Drowned as a  result of being underwater.*/
     isConverting (): boolean;
     /**Check if zombie is drowning*/
     isDrowning (): boolean;
+    /**Deprecated. check if instanceof ZombieVillager. */
+    isVillager (): boolean;
     /**Set if zombie has its arms raised*/
     setArmsRaised (raised: boolean): void;
+    /**Deprecated. see Ageable.setBaby() and Ageable.setAdult() */
+    setBaby (flag: boolean): void;
     /**Sets the amount of ticks until this entity will be converted to a Drowned  as a result of being underwater.*/
     setConversionTime (time: number): void;
     /**Set if this zombie should burn in the sunlight*/
     setShouldBurnInDay (shouldBurnInDay: boolean): void;
+    /**Deprecated. must spawn ZombieVillager. */
+    setVillager (flag: boolean): void;
+    /**Deprecated.*/
+    setVillagerProfession (profession: Villager$Profession): void;
     /**Check if this zombie will burn in the sunlight*/
     shouldBurnInDay (): boolean;
+    /**Deprecated. See setConversionTime(int) */
+    startDrowning (drownedConversionTime: number): void;
     /**Stop a zombie from starting the drowning conversion process*/
     stopDrowning (): void
 }
