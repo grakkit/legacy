@@ -735,7 +735,7 @@
             const data = JSON.stringify(core.serialize(core.session.data[path], true));
             core.root.file('data', `${path}.json`).add().write(data);
          });
-         core.session = { command: {}, data: {}, event: {}, export: { file: [], module: [] } };
+         core.session = { command: {}, data: {}, event: {}, export: { file: [], module: [] }, types: {} };
          for (let key in global) delete global[key];
          disable || core.init();
       },
@@ -764,9 +764,7 @@
          data: {},
          event: {},
          export: { file: [], module: [] },
-         get module () {
-            return core.data('modules');
-         }
+         types: {}
       },
       send: (player, message, action) => {
          const limit = action ? 128 : 2048;
@@ -775,7 +773,7 @@
          else player.sendMessage(message);
       },
       type: (name) => {
-         return Java.type(name);
+         return core.session.types[name] || (core.session.types[name] = Java.type(name));
       },
       unzip: (from, to) => {
          const stream = new ZipInputStream(from);
