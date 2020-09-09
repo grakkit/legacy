@@ -95,12 +95,19 @@ export interface core {
    /** Removes circular references from an object recursively, replacing them with circular markers or `null` if `nullify` is true. */
    serialize: (object: any, nullify: boolean, ...nodes: any[]) => any;
    session: {
-      command: any;
+      command: {
+         [x: string]: {
+            execute: (player: Player, ...args: string[]) => void;
+            tabComplete: (player: Player, ...args: string[]) => string[];
+         };
+      };
       data: any;
-      event: any;
+      event: {
+         [x: string]: ((value: any) => void)[];
+      };
       export: { file: ((value: any) => void)[]; module: ((value: any) => void)[] };
-      module: any;
       origin: core$file;
+      types: any;
    };
    /** Sends a message to the given player in chat, or in the action bar if `action` is true. */
    send: (player: Player, message: string, action: boolean) => void;
