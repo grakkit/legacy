@@ -517,7 +517,7 @@
                      case 'update':
                         core.send(player, '§7Updating...');
                         try {
-                           core.root.file('dict').remove();
+                           core.toggles.dict && core.root.file('dict').remove();
                            core.root.file('index.js').write(core.fetch(`${core.master}/index.js`).read());
                            core.refresh(true);
                            core.import('index.js');
