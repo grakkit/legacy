@@ -154,6 +154,9 @@
             (core.session.export.module.slice(-1)[0] || (() => {}))(object);
          }
       },
+      extend: (name, ...addons) => {
+         return Java.extend(core.type(name), ...addons);
+      },
       fetch: (from) => {
          const link = new URL(from).openConnection();
          link.setDoOutput(true);
@@ -835,12 +838,12 @@
    };
 
    const Bukkit = core.type('org.bukkit.Bukkit');
-   const Command = Java.extend(core.type('org.bukkit.command.Command'));
+   const Command = core.extend('org.bukkit.command.Command');
    const FileInputStream = core.type('java.io.FileInputStream');
    const FileOutputStream = core.type('java.io.FileOutputStream');
    const Files = core.type('java.nio.file.Files');
    const HandlerList = core.type('org.bukkit.event.HandlerList');
-   const Listener = Java.extend(core.type('org.bukkit.event.Listener'), {});
+   const Listener = core.extend('org.bukkit.event.Listener', {});
    const Paths = core.type('java.nio.file.Paths');
    const Scanner = core.type('java.util.Scanner');
    const Source = core.type('org.graalvm.polyglot.Source');
