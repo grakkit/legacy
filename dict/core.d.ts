@@ -72,23 +72,31 @@ export interface core {
    manager: obpPluginManager;
    module: {
       /** Performs the given action on a module and informs the player on the results. */
-      action: (player: obcCommandSender, option: 'add' | 'create' | 'remove' | 'update', key: string) => void;
-      /** Downloads and registers a module's latest release to the server. */
-      add: (key: string) => void;
-      /** Deletes a module from the server. */
-      delete: (key: string) => void;
+      action: (
+         player: obcCommandSender,
+         option: 'add' | 'change' | 'create' | 'remove' | 'update',
+         key: string,
+         version?: string
+      ) => void;
+      /** Downloads and registers a module to the server. */
+      add: (key: string, version?: string) => void;
+      /** Modifies the version of an installed module. */
+      change: (key: string, version: string) => void;
       /** Creates a module from scratch. */
       create: (key: string) => void;
+      /** Deletes a module from the server. */
+      delete: (key: string, version?: string, dependency?: boolean) => void;
       /** Stores all installed dependencies and their versions. */
       dependencies: { [x: string]: string[] };
       /** Generates typescript references for all installed modules. */
       dict: () => void;
       /** Downloads a module's latest release to the server and returns that release's tag name. */
-      download: (key: string) => string;
+      download: (key: string, version?: string, dependency?: boolean) => string;
       /** Returns the info on the given version (latest if none is specified) of a module. */
       version: (
          key: string,
-         version?: string
+         version?: string,
+         dependency?: boolean
       ) => {
          name: string;
          zipball_url: string;
@@ -102,7 +110,10 @@ export interface core {
       /** Stores all installed modules and their current versions. */
       modules: { [x: string]: string };
       /** Returns the package information for a module. */
-      package: (key: string) => { main: string; dependencies: { [x: string]: string } };
+      package: (key: string, version?: string, dependency?: boolean) => {
+         main: string;
+         dependencies: { [x: string]: string }
+      };
       /** Deletes and unregisters a module from the server. */
       remove: (key: string) => void;
       /** Updates a module if the latest release is not already installed. */
@@ -148,6 +159,8 @@ export interface core {
       legacy: boolean;
       /** References the current execution context. */
       origin: core$file;
+      /** A list of overrides used when importing a dependency. */
+      scope: { [x: string]: string };
       /** A list of all currently scheduled tasks. */
       task: { script: Function; args: any[]; tick: number }[];
       /** The scheduler's current tick. */
