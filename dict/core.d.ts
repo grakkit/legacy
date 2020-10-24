@@ -34,8 +34,8 @@ export interface core {
    data: (...path: string[]) => any;
    /** Registers event listeners to the server. */
    event: typeof events.event;
-   /** Used by modules to export their code. */
-   export: (object: any) => void;
+   /** Used by modules to export their code. The optional `file` argument is for internal use only and will be removed in a future update. */
+   export: (object: any, file?: boolean) => void;
    /** Imports a type from the server and extends it. */
    extend: typeof types.type;
    /** Make a GET request to the given URL. */
@@ -56,7 +56,7 @@ export interface core {
    /** Utility functions for formatting input */
    format: {
       /** A stand-in for circular references. */
-      circular: () => void;
+      circular: symbol;
       /** Formats common server error messages. */
       error: (error: string) => string;
       /** Formats the given object into a pretty-printed string. */
@@ -161,12 +161,14 @@ export interface core {
       origin: core$file;
       /** A list of overrides used when importing a dependency. */
       scope: { [x: string]: string };
+      /** A list of all inputs passed to the importer during its execution. */
+      stack: string[];
       /** A list of all currently scheduled tasks. */
       task: { script: Function; args: any[]; tick: number }[];
       /** The scheduler's current tick. */
       tick: number;
       /** Stores imported types as a cache. */
-      types: any;
+      type: any;
    };
    /** **Deprecated.** Sends a message to the given player in chat or in the action bar. */
    send: (player: obcCommandSender, message: string, action: boolean) => void;
@@ -174,8 +176,14 @@ export interface core {
    storage: any;
    /** A set of toggles used to control behavior in the initialization phase. */
    toggles: {
+      /** Toggle for JS config generation. */
+      config: boolean;
       /** Toggle for dictionary file downloads. */
       dict: boolean;
+      /** Toggle for js command. */
+      js: boolean;
+      /** Toggle for module command. */
+      module: boolean;
       /** Toggle for scripts folder evaluation. */
       scripts: boolean;
       /** Toggle for trusted module list fetching. */
@@ -185,14 +193,16 @@ export interface core {
    };
    /** Imports a type from the server. */
    type: typeof types.type;
-   /** Utility functions for  */
+   /** Utility functions for miscellaneous purposes. */
    util: {
       /** A utility function used for recursive operations. */
       chain: (base: any, modifier: (object: any, chain: Function) => void) => void;
       /** Evaluates JS code. */
       eval: (code: string) => any;
+      /** Filters the input array by elements which contain a case-insensitive match to the input string. */
+      filter: (value: string, array: string[]) => string[];
       /** Moves or copies the file or folder from one path to another path. */
-      transfer: () => any;
+      transfer: (from: core$file, to: core$file, action: 'move' | 'copy') => void;
       /** Attempts to parse the input stream as a ZIP file and unzips the contents to the given path. */
       unzip: (from: jiInputStream, to: core$file) => void;
    };
@@ -218,7 +228,8 @@ interface core$file {
    /** The internal file interface for the current path. */
    io: jiFile;
    /** Attempts to parse the current path as a JSON file. */
-   json: Function;
+   json (): any;
+   json (handler: (content: any) => any): core$file;
    /** Moves the file or folder at the current path to another path, and flushes the current path's parent folders. */
    move: (to: core$file) => core$file;
    /** The name of the file or folder at the current path. */
@@ -228,7 +239,8 @@ interface core$file {
    /** The current path in string form. */
    path: string;
    /** If the current path is a file, returns the raw output content of that file. */
-   read: () => string;
+   read (): string;
+   read (handler: (content: string) => any): core$file;
    /** Removes the file or folder at the current path, and flushes its parent folders. */
    remove: () => core$file;
    /** Returns an output stream for the file at the current path. */

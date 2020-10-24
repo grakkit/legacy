@@ -104,8 +104,8 @@
             (core.session.export.module.slice(-1)[0] || (() => {}))(object);
          }
       },
-      extend: (name, ...addons) => {
-         return Java.extend(core.type(name), ...addons);
+      extend: (name, ...args) => {
+         return Java.extend(core.type(name), ...args);
       },
       fetch: (from) => {
          const link = new URL(from).openConnection();
@@ -194,12 +194,23 @@
             get io () {
                return io;
             },
-            json: () => {
+            json: (handler) => {
+               let content;
                try {
-                  return JSON.parse(thing.read());
+                  content = JSON.parse(thing.read());
                } catch (error) {
-                  return null;
+                  content = null;
                }
+               if (handler) {
+                  handler(content);
+                  return thing;
+               } else {
+                  return content;
+               }
+            },
+            move: (to) => {
+               core.util.transfer(thing, to, 'move');
+               return thing.flush();
             },
             get name () {
                return io.getName();
@@ -214,8 +225,14 @@
             get path () {
                return io.getPath().replace(/(\\)/g, '/');
             },
-            read: () => {
-               return io.exists() && !io.isDirectory() ? Files.readString(io.toPath()) : null;
+            read: (handler) => {
+               const content = !io.exists() ? null : !io.isDirectory() ? Files.readString(io.toPath()) : null;
+               if (handler) {
+                  handler(content);
+                  return thing;
+               } else {
+                  return content;
+               }
             },
             remove: () => {
                core.util.chain(io, (io, loop) => {
@@ -226,10 +243,6 @@
             },
             stream: () => {
                return new FileOutputStream(io);
-            },
-            move: (to) => {
-               core.util.transfer(thing, to, 'move');
-               return thing.flush();
             },
             write: (content) => {
                io.exists() && !io.isDirectory() && Files.writeString(io.toPath(), content);
@@ -243,7 +256,8 @@
          return thing;
       },
       format: {
-         circular: class {},
+         circular: Symbol(),
+         // this needs to be completely overhauled, like, bad
          error: (error) => {
             let type = 'Error';
             let message = `${error}`;
@@ -288,9 +302,10 @@
             }
             return `${type}: ${message}`;
          },
+         // need to fix first member in top level object/array showing as full object
          output: (object, nested) => {
             if (nested) {
-               if (object instanceof core.format.circular) {
+               if (object === core.format.circular) {
                   return 'Circular';
                } else {
                   const type = toString.apply(object);
@@ -349,7 +364,7 @@
                let output = typeof object[Symbol.iterator] === 'function' ? [] : {};
                for (const key in object) {
                   const value = object[key];
-                  if (nodes.includes(value)) output[key] = nullify ? null : new core.format.circular();
+                  if (nodes.includes(value)) output[key] = nullify ? null : core.format.circular;
                   else output[key] = core.format.serialize(value, nullify, [ ...nodes, object ]);
                }
                return output;
@@ -357,57 +372,68 @@
          }
       },
       import: (source) => {
-         if (source[0] === '@') {
-            const key = source.slice(1);
-            const version = core.session.scope[key];
-            const { main, dependencies } = core.module.package(key, version, !!version);
-            const state = [ core.session.scope, core.session.origin, storage ];
-            let result = null;
-            core.session.scope = dependencies;
-            core.session.origin = main.file('..');
-            core.session.export.module.push((output) => (result = output));
-            storage = {};
-            try {
-               core.import(`./${main.name}`);
-               storage = state[1];
-               core.session.export.module.pop();
-               core.session.scope = state[0];
-               core.session.origin = state[1];
-               return result;
-            } catch (error) {
-               console.error(`An error occured while attempting to evaluate the "${key}" module!`);
-               storage = state[1];
-               core.session.export.module.pop();
-               core.session.scope = state[0];
-               core.session.origin = state[1];
-               throw error;
+         if (core.session.stack.push(source) < 64) {
+            if (source[0] === '@') {
+               const key = source.slice(1);
+               const version = core.session.scope[key];
+               const { main, dependencies } = core.module.package(key, version, !!version);
+               const state = [ core.session.scope, core.session.origin, storage ];
+               let result = null;
+               core.session.scope = dependencies;
+               core.session.origin = main.file('..');
+               core.session.export.module.push((output) => (result = output));
+               storage = {};
+               const done = () => {
+                  storage = state[1];
+                  core.session.export.module.pop();
+                  core.session.scope = state[0];
+                  core.session.origin = state[1];
+                  core.session.stack.pop();
+                  delete done;
+               };
+               try {
+                  core.import(`./${main.name}`);
+                  done();
+                  return result;
+               } catch (error) {
+                  console.error(`An error occured while attempting to evaluate the "${key}" module!`);
+                  done();
+                  throw error;
+               }
+            } else {
+               const file = core.session.origin.file(source);
+               const uuid = UUID.randomUUID().toString();
+               const importer = file.file(`../import.${file.name}.${uuid}.grakkit`);
+               const exporter = file.file(`../export.${file.name}.${uuid}.grakkit`);
+               file.copy(exporter);
+               importer.add().write(`import * as output from '${exporter.name}'; core.export(output, true);`);
+               const state = core.session.origin;
+               let result = null;
+               core.session.origin = file.file('..');
+               core.session.export.file.push((output) => (result = output));
+               const done = () => {
+                  core.session.export.file.pop();
+                  core.session.origin = state;
+                  importer.remove();
+                  exporter.remove();
+                  core.session.stack.pop();
+                  delete done;
+               };
+               try {
+                  importer.parse();
+                  done();
+                  return result;
+               } catch (error) {
+                  console.error(`An error occured while attempting to evaluate the "${file.path}" file!`);
+                  done();
+                  throw error;
+               }
             }
          } else {
-            const file = core.session.origin.file(source);
-            const uuid = java.util.UUID.randomUUID().toString();
-            const importer = core.root.file(`import.js-${uuid}`);
-            const exporter = file.file(`../${file.name}-${uuid}`);
-            file.copy(exporter);
-            importer.add().write(`import * as output from '../../${exporter.path}'; core.export(output, true);`);
-            const state = core.session.origin;
-            let result = null;
-            core.session.origin = file.file('..');
-            core.session.export.file.push((output) => (result = output));
-            try {
-               importer.parse();
-               core.session.export.file.pop();
-               core.session.origin = state;
-               importer.remove();
-               exporter.remove();
-               return result;
-            } catch (error) {
-               console.error(`An error occured while attempting to evaluate the "${file.path}" file!`);
-               core.session.export.file.pop();
-               core.session.origin = state;
-               importer.remove();
-               exporter.remove();
-               throw error;
-            }
+            console.error('An error occured while attempting to import a file or module!');
+            console.error(`Too many recursive imports were made:\n${[ ...core.session.stack ].reverse().join('\n')}`);
+            core.session.stack.pop();
+            return null;
          }
       },
       init: () => {
@@ -419,9 +445,10 @@
             legacy: !!EventType,
             origin: core.root,
             scope: {},
+            stack: [],
             task: [],
             tick: 0,
-            types: core.session.types
+            type: core.session.type
          };
          server.getScheduler().runTaskTimer(
             core.plugin,
@@ -506,147 +533,154 @@
                );
             }
          });
-         core.command({
-            name: 'js',
-            permission: 'grakkit.command.js',
-            error: '§cYou lack the permission §4(grakkit.command.js) §cto use that command!',
-            execute: (player, ...args) => {
-               const self = global.hasOwnProperty('self');
-               try {
-                  self || (global.self = player);
-                  const result = core.util.eval(args.join(' '));
-                  self || delete global.self;
-                  if (toString.apply(result) === '[foreign HostFunction]') {
-                     let input = args.slice(-1)[0].split('.').slice(-1)[0];
-                     input.endsWith(']') && (input = eval(input.replace(/.*\[/, '').slice(0, -1)));
-                     player.sendMessage(`§7hostFunction ${input.split(/[|;]/g)[0]}() { [native code] }`);
-                  } else {
-                     player.sendMessage(`§7${core.format.output(result)}`);
+         if (core.toggles.js !== false) {
+            core.command({
+               name: 'js',
+               permission: 'grakkit.command.js',
+               error: '§cYou lack the permission §4(grakkit.command.js) §cto use that command!',
+               execute: (player, ...args) => {
+                  const self = global.hasOwnProperty('self');
+                  try {
+                     self || (global.self = player);
+                     const result = core.util.eval(args.join(' '));
+                     self || delete global.self;
+                     if (toString.apply(result) === '[foreign HostFunction]') {
+                        let input = args.slice(-1)[0].split('.').slice(-1)[0];
+                        input.endsWith(']') && (input = eval(input.replace(/.*\[/, '').slice(0, -1)));
+                        player.sendMessage(`§7hostFunction ${input.split(/[|;]/g)[0]}() { [native code] }`);
+                     } else {
+                        player.sendMessage(`§7${core.format.output(result)}`);
+                     }
+                  } catch (error) {
+                     self || delete global.self;
+                     player.sendMessage(`§c${core.format.error(error)}`);
                   }
-               } catch (error) {
-                  self || delete global.self;
-                  player.sendMessage(`§c${core.format.error(error)}`);
-               }
-            },
-            tabComplete: (player, ...args) => {
-               const input = args.slice(-1)[0];
-               const single = /(\!|\^|\&|\*|\(|\-|\+|\=|\{|\||\;|\:|\,|\?|\/)/;
-               const filter = /.*(\!|\^|\)|\&|\*|\(|\-|\+|\=|\{|\||\;|\:|\,|\?|\/)/;
-               let index = 0;
-               let string = null;
-               let nodes = input;
-               while (index < input.length) {
-                  const char = input[index];
-                  if (char === string) string = null;
-                  else if ([ "'", '"', '`' ].includes(char)) string = char;
-                  else if (!string && single.test(char)) nodes = input.slice(index + 1);
-                  ++index;
-               }
-               index = 0;
-               nodes = nodes.replace(/(\[)|(\]\.)/g, '.').split('.');
-               let scope = global;
-               while (index < nodes.length - 1) {
-                  let node = nodes[index++];
-                  [ "'", '"', '`' ].includes(node[0]) && (node = node.slice(1, -1));
-                  node.length && node[0].match(/[0-9]/g) && (node = Number(node));
-                  if (scope[node]) scope = scope[node];
-                  else if (scope === global && node === 'self') scope = player;
-                  else index = Infinity;
-               }
-               if (index === nodes.length - 1) {
-                  const base = (input.match(filter) || [ '' ])[0] + input.replace(filter, '');
-                  let segment = nodes.slice(-1)[0];
-                  [ "'", '"', '`' ].includes(segment[0]) && (segment = segment.slice(1, -1));
-                  const properties = Object.getOwnPropertyNames(scope);
-                  if (scope === global && !properties.includes('self')) properties.push('self');
-                  if (typeof scope.length === 'number' && [ 'object', 'function' ].includes(typeof scope[0])) {
-                     properties.push(...Array(scope.length).join(' ').split(' ').map((value, index) => `${index}`));
+               },
+               // one day imma fix this shit... (probably very soon tbh)
+               // like for real this shit is B A D
+               tabComplete: (player, ...args) => {
+                  const input = args.slice(-1)[0];
+                  const single = /(\!|\^|\&|\*|\(|\-|\+|\=|\{|\||\;|\:|\,|\?|\/)/;
+                  const filter = /.*(\!|\^|\)|\&|\*|\(|\-|\+|\=|\{|\||\;|\:|\,|\?|\/)/;
+                  let index = 0;
+                  let string = null;
+                  let nodes = input;
+                  while (index < input.length) {
+                     const char = input[index];
+                     if (char === string) string = null;
+                     else if ([ "'", '"', '`' ].includes(char)) string = char;
+                     else if (!string && single.test(char)) nodes = input.slice(index + 1);
+                     ++index;
                   }
-                  return properties
-                     .filter((key) => key.toLowerCase().includes(segment.toLowerCase()))
-                     .map((key) => {
-                        let property = '';
-                        if (key.length && key[0].match(/[0-9]/g)) property = `[${key}]`;
-                        else if (key.match(/[^0-9A-Za-z|\_|\$]/g)) return null;
-                        else property = `.${key}`;
-                        const path = base.split(property[0]);
-                        const name = property.slice(1);
-                        if (!base || !base.match(/[\.\[]/g)) return base.split(single).slice(0, -1).join('') + name;
-                        else if (scope === global) return base + name;
-                        else if (name.includes(path.slice(-1)[0]))
-                           return path.slice(0, -1).join(property[0]) + property;
-                     })
-                     .filter((property) => property);
-               }
-            }
-         });
-         core.command({
-            name: 'module',
-            permission: 'grakkit.command.module',
-            error: '§cYou lack the permission §4(grakkit.command.module) §cto use that command!',
-            execute: (player, option, key, version) => {
-               if (option) {
-                  option = option.toLowerCase();
-                  switch (option) {
-                     case 'list':
-                        const keys = Object.keys(core.module.modules);
-                        player.sendMessage(`§7Installed modules: ${core.format.output(keys)}`);
-                        break;
-                     case 'add':
-                     case 'change':
-                     case 'create':
-                     case 'remove':
-                     case 'update':
-                        switch (key) {
-                           case '':
-                           case void 0:
-                              player.sendMessage('§cYou must specify a repository!');
-                              break;
-                           case '*':
-                              switch (option) {
-                                 case 'add':
-                                    player.sendMessage('§7One sec, just gotta download the entire GitHub database...');
-                                    break;
-                                 case 'change':
-                                    player.sendMessage('§7Not every module uses the same release tags, dipshit.');
-                                    break;
-                                 case 'create':
-                                    player.sendMessage("§7So you're saying there's a finite number of possible names?");
-                                    break;
-                                 default:
-                                    for (const key in core.module.modules) core.module.action(player, option, key);
-                              }
-                              break;
-                           default:
-                              core.module.action(player, option, key, version);
-                        }
-                        break;
-                     default:
-                        player.sendMessage('§cThat option is invalid!');
+                  index = 0;
+                  nodes = nodes.replace(/(\[)|(\]\.)/g, '.').split('.');
+                  let scope = global;
+                  while (index < nodes.length - 1) {
+                     let node = nodes[index++];
+                     [ "'", '"', '`' ].includes(node[0]) && (node = node.slice(1, -1));
+                     node.length && node[0].match(/[0-9]/g) && (node = Number(node));
+                     if (scope[node]) scope = scope[node];
+                     else if (scope === global && node === 'self') scope = player;
+                     else index = Infinity;
                   }
-               } else {
-                  player.sendMessage('§cYou must specify an option!');
+                  if (index === nodes.length - 1) {
+                     const base = (input.match(filter) || [ '' ])[0] + input.replace(filter, '');
+                     let segment = nodes.slice(-1)[0];
+                     [ "'", '"', '`' ].includes(segment[0]) && (segment = segment.slice(1, -1));
+                     const properties = Object.getOwnPropertyNames(scope);
+                     if (scope === global && !properties.includes('self')) properties.push('self');
+                     if (typeof scope.length === 'number' && [ 'object', 'function' ].includes(typeof scope[0])) {
+                        properties.push(...Array(scope.length).join(' ').split(' ').map((value, index) => `${index}`));
+                     }
+                     return core.util
+                        .filter(segment, properties)
+                        .map((key) => {
+                           let property = '';
+                           if (key.length && key[0].match(/[0-9]/g)) property = `[${key}]`;
+                           else if (key.match(/[^0-9A-Za-z|\_|\$]/g)) return null;
+                           else property = `.${key}`;
+                           const path = base.split(property[0]);
+                           const name = property.slice(1);
+                           if (!base || !base.match(/[\.\[]/g)) return base.split(single).slice(0, -1).join('') + name;
+                           else if (scope === global) return base + name;
+                           else if (name.includes(path.slice(-1)[0]))
+                              return path.slice(0, -1).join(property[0]) + property;
+                        })
+                        .filter((property) => property);
+                  }
                }
-            },
-            tabComplete: (player, ...args) => {
-               switch (args.length) {
-                  case 1:
-                     return [ 'add', 'change', 'create', 'list', 'remove', 'update' ].filter((value) => {
-                        return value.includes(args[0]);
-                     });
-                  case 2:
-                     switch (args[0]) {
+            });
+         }
+         if (core.toggles.module !== false) {
+            core.command({
+               name: 'module',
+               permission: 'grakkit.command.module',
+               error: '§cYou lack the permission §4(grakkit.command.module) §cto use that command!',
+               execute: (player, option, key, version) => {
+                  if (option) {
+                     option = option.toLowerCase();
+                     switch (option) {
+                        case 'list':
+                           const keys = Object.keys(core.module.modules);
+                           player.sendMessage(`§7Installed modules: ${core.format.output(keys)}`);
+                           break;
                         case 'add':
-                           return trusted.filter((value) => value.includes(args[1]));
                         case 'change':
+                        case 'create':
                         case 'remove':
                         case 'update':
-                           const keys = Object.keys(core.module.modules);
-                           return [ '*', ...keys.filter((value) => value.includes(args[1])) ];
+                           switch (key) {
+                              case '':
+                              case void 0:
+                                 player.sendMessage('§cYou must specify a repository!');
+                                 break;
+                              case '*':
+                                 switch (option) {
+                                    case 'add':
+                                       player.sendMessage(
+                                          '§7One sec, just gotta download the entire GitHub database...'
+                                       );
+                                       break;
+                                    case 'change':
+                                       player.sendMessage('§7Not every module uses the same release tags, dipshit.');
+                                       break;
+                                    case 'create':
+                                       player.sendMessage(
+                                          "§7So you're saying there's a finite number of possible names?"
+                                       );
+                                       break;
+                                    default:
+                                       for (const key in core.module.modules) core.module.action(player, option, key);
+                                 }
+                                 break;
+                              default:
+                                 core.module.action(player, option, key, version);
+                           }
+                           break;
+                        default:
+                           player.sendMessage('§cThat option is invalid!');
                      }
+                  } else {
+                     player.sendMessage('§cYou must specify an option!');
+                  }
+               },
+               tabComplete: (player, ...args) => {
+                  switch (args.length) {
+                     case 1:
+                        return core.util.filter(args[0], [ 'add', 'change', 'create', 'list', 'remove', 'update' ]);
+                     case 2:
+                        switch (args[0]) {
+                           case 'add':
+                              return core.util.filter(args[1], trusted);
+                           case 'change':
+                           case 'remove':
+                           case 'update':
+                              return [ '*', ...core.util.filter(args[1], Object.keys(core.module.modules)) ];
+                        }
+                  }
                }
-            }
-         });
+            });
+         }
          core.command({
             name: 'grakkit',
             permission: 'grakkit.command.grakkit',
@@ -664,7 +698,10 @@
                         if (target) {
                            target = target.toLowerCase();
                            switch (target) {
+                              case 'config':
                               case 'dict':
+                              case 'js':
+                              case 'module':
                               case 'scripts':
                               case 'trusted':
                               case 'user':
@@ -701,11 +738,19 @@
             tabComplete: (player, ...args) => {
                switch (args.length) {
                   case 1:
-                     return [ 'refresh', 'toggle', 'update' ].filter((value) => value.includes(args[0]));
+                     return core.util.filter(args[0], [ 'refresh', 'toggle', 'update' ]);
                   case 2:
                      switch (args[0]) {
                         case 'toggle':
-                           return [ 'dict', 'scripts', 'trusted', 'user' ].filter((value) => value.includes(args[1]));
+                           return core.util.filter(args[1], [
+                              'config',
+                              'dict',
+                              'js',
+                              'module',
+                              'scripts',
+                              'trusted',
+                              'user'
+                           ]);
                      }
                }
             }
@@ -713,6 +758,7 @@
          core.event('org.bukkit.event.server.PluginDisableEvent', (event) => {
             event.getPlugin() === core.plugin && core.refresh(true);
          });
+         core.module.dict();
          if (core.toggles.trusted !== false) {
             try {
                console.log('Downloading trusted module list...');
@@ -735,20 +781,16 @@
                   }
                }
             }
-            core.module.dict();
          }
          if (core.toggles.user !== false) {
-            const user = core.root.file('user.js');
-            user.exists ||
-               user
-                  .add()
-                  .write(
-                     "/** @type {import('./dict/core').core} */ const core = global.core;\n/** @type {import('./dict/classes').Server} */ const server = global.server;\n"
-                  );
-            user.execute();
+            core.root.file('user.js').add().execute();
          }
          if (core.toggles.scripts !== false) {
             core.root.file('scripts').dir().execute();
+         }
+         if (core.toggles.config !== false) {
+            const config = core.root.file('jsconfig.json');
+            config.exists || config.add().write('{\n   "compilerOptions": {\n      "lib": [ "es2020" ]\n   }\n}\n');
          }
       },
       get manager () {
@@ -863,16 +905,18 @@
             return core.data('../dependencies');
          },
          dict: () => {
-            core.root.file('dict/imports.d.ts').add().write(
-               [
-                  'export class imports {',
-                  '   static import (name: string): any;',
-                  ...Object.keys(core.module.modules).map((key) => {
-                     return `   static import (name: '@${key}'): import('./../modules/${key}/module').Main;`;
-                  }),
-                  '}'
-               ].join('\n')
-            );
+            if (core.toggles.dict !== false) {
+               core.root.file('dict/imports.d.ts').add().write(
+                  [
+                     'export class imports {',
+                     '   static import (name: string): any;',
+                     ...Object.keys(core.module.modules).map((key) => {
+                        return `   static import (name: '@${key}'): import('./../modules/${key}/module').Main;`;
+                     }),
+                     '}'
+                  ].join('\n')
+               );
+            }
          },
          download: (key, version, dependency) => {
             let target;
@@ -1031,7 +1075,7 @@
             });
          }
       },
-      session: { types: {} },
+      session: { type: {} },
       get storage () {
          return storage;
       },
@@ -1039,15 +1083,18 @@
          return core.data('../toggles');
       },
       type: (name) => {
-         return core.session.types[name] || (core.session.types[name] = Java.type(name));
+         return core.session.type[name] || (core.session.type[name] = Java.type(name));
       },
       util: {
-         eval: (code) => {
-            return Polyglot.eval('js', code);
-         },
          chain: (base, modifier) => {
             const chain = (object) => modifier(object, chain);
             chain(base);
+         },
+         eval: (code) => {
+            return Polyglot.eval('js', code);
+         },
+         filter: (value, array) => {
+            return array.filter((element) => element.toLowerCase().includes(value.toLowerCase()));
          },
          transfer: (from, to, action) => {
             core.util.chain([ from.io, to.io ], (io, loop) => {
@@ -1104,6 +1151,7 @@
    const Source = core.type('org.graalvm.polyglot.Source');
    const StandardCopyOption = core.type('java.nio.file.StandardCopyOption');
    const URL = core.type('java.net.URL');
+   const UUID = core.type('java.util.UUID');
    const ZipInputStream = core.type('java.util.zip.ZipInputStream');
 
    let EventPriority, EventType;
@@ -1134,3 +1182,13 @@
 
    core.init();
 })();
+
+/** @type {{ core: import('./dict/core').core, server: import('./dict/classes').obServer }} */
+const { core, server } = {
+   get core () {
+      return globalThis.core;
+   },
+   get server () {
+      return globalThis.server;
+   }
+};
