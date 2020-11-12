@@ -783,7 +783,17 @@
                      case 'update':
                         player.sendMessage('\xa77Updating...');
                         try {
-                           core.toggles.dict === false || core.root.file('dict').remove();
+                           if (core.toggles.dict !== false) {
+                              core.root.file('dict/classes.d.ts').remove();
+                              core.root.file('dict/core.d.ts').remove();
+                              core.root.file('dict/events.d.ts').remove();
+                              core.root.file('dict/index.d.ts').remove();
+                              core.root.file('dict/types.d.ts').remove();
+                           }
+                           if (core.toggles.config !== false) {
+                              core.root.file('package.json').remove();
+                              core.root.file('tsconfig.json').remove();
+                           }
                            core.refresh(true);
                            core.root.file('index.js').write(core.fetch(`${remote}/index.js`).read()).execute();
                            player.sendMessage('\xa77Update Complete.');
@@ -833,7 +843,7 @@
             }
          }
          if (core.toggles.dict !== false) {
-            for (const name of [ 'classes', 'core', 'events', 'types' ]) {
+            for (const name of [ 'classes', 'core', 'events', 'index', 'types' ]) {
                const target = core.root.file('dict', `${name}.d.ts`);
                if (!target.exists) {
                   try {
@@ -853,8 +863,18 @@
             core.root.file('scripts').dir().execute();
          }
          if (core.toggles.config !== false) {
-            const config = core.root.file('jsconfig.json');
-            config.exists || config.add().write('{\n   "compilerOptions": {\n      "lib": [ "es2020" ]\n   }\n}\n');
+            for (const name of [ 'package', 'tsconfig' ]) {
+               const target = core.root.file(`${name}.json`);
+               if (!target.exists) {
+                  try {
+                     console.log(`Downloading configuration... ${target.path}`);
+                     target.add().write(core.fetch(`${remote}/${name}.json`).read());
+                  } catch (error) {
+                     console.error(`An error occured while attempting to download the "${target.path}" configuration!`);
+                     console.error(error.stack || error.message || error);
+                  }
+               }
+            }
          }
       },
       get manager () {
@@ -1246,13 +1266,3 @@
 
    core.init();
 })();
-
-/** @type {{ core: import('./dict/core').core, server: import('./dict/classes').obServer }} */
-const { core, server } = {
-   get core () {
-      return globalThis.core;
-   },
-   get server () {
-      return globalThis.server;
-   }
-};
