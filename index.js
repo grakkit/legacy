@@ -783,7 +783,7 @@
                      case 'update':
                         player.sendMessage('\xa77Updating...');
                         try {
-                           core.toggles.dict && core.root.file('dict').remove();
+                           core.toggles.dict === false || core.root.file('dict').remove();
                            core.refresh(true);
                            core.root.file('index.js').write(core.fetch(`${remote}/index.js`).read()).execute();
                            player.sendMessage('\xa77Update Complete.');
