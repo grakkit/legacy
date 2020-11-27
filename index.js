@@ -147,10 +147,7 @@ export const index = (function () {
     const root = file(plugin.getDataFolder().getPath().replace(/[\\]/g, '/'));
     const core = {
         command(options) {
-            const list = new ArrayList();
-            for (const element of [...(options.aliases || [])])
-                list.add(element);
-            core.plugin.register(`${options.fallback || 'grakkit'}:${options.name}`, options.name, "", "", list, options.permission || '', options.error || '', options.fallback || 'grakkit', (player, name, args) => {
+            core.plugin.register(options.fallback || 'grakkit', options.name, options.aliases || [], options.permission || '', options.error || '', (player, name, args) => {
                 if (options.permission && !player.hasPermission(options.permission)) {
                     options.error && player.sendMessage(options.error);
                 }
@@ -416,7 +413,9 @@ export const index = (function () {
                     const importer = file.file(`../import.${file.name}.${uuid}.grakkit`);
                     const exporter = file.file(`../export.${file.name}.${uuid}.grakkit`);
                     file.copy(exporter);
-                    importer.add().write(`import * as output from '${exporter.name}'; core.session.export.slice(-1)[0](output);`);
+                    importer
+                        .add()
+                        .write(`import * as output from '${exporter.name}'; core.session.export.slice(-1)[0](output);`);
                     const state = core.session.origin;
                     let result = null;
                     core.session.origin = file.file('..');
@@ -654,7 +653,7 @@ export const index = (function () {
                                     property ? (valid = false) : (body = '');
                                     break;
                                 default:
-                                    if (char.match(/\+-\*\/\^=!&\|\?:\(,;/g)) {
+                                    if (char.match(/[\+\-\*\/\^=!&\|\?:\(,;]/g)) {
                                         if (!bracket) {
                                             body = input.slice(0, index + 1);
                                             scope = globalThis;
@@ -861,7 +860,7 @@ export const index = (function () {
                 }
                 else {
                     const folder = core.root.file('modules', key);
-                    folder.file('index.js').add().write("export const Main = {}\n");
+                    folder.file('index.js').add().write('export const Main = {}\n');
                     core.module.modules[key] = null;
                     core.module.dict();
                 }

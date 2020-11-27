@@ -2,27 +2,19 @@ import { types } from './dict/types';
 import { events } from './dict/events';
 import { imports } from './dict/imports';
 
-import {
-   jiInputStream,
-   jlrField,
-   obcCommandMap,
-   obcCommandSender,
-   obeEventPriority,
-   ogpContext
-} from './dict/classes';
+import { jiInputStream, jlrField, obcCommandMap, obcCommandSender, obeEventPriority, ogpContext } from './dict/classes';
 
 declare const Java: {
-   extend <X> (type: X, ...args: any[]): X,
-   type <X extends keyof types> (name: X): types[X]
+   extend<X>(type: X, ...args: any[]): X;
+   type<X extends keyof types>(name: X): types[X];
 };
 
 declare const Polyglot: {
-   eval (...args: any[]): any;
-}
+   eval(...args: any[]): any;
+};
 
 /** The best thing that's ever happened to minecraft, change my mind. */
 export const index = (function () {
-
    //@ts-expect-error
    const session$type: types = {};
 
@@ -214,18 +206,13 @@ export const index = (function () {
          permission?: string;
          tabComplete?: (sender: obcCommandSender, ...args: string[]) => string[];
       }) {
-         const list = new ArrayList();
-         for (const element of [...(options.aliases || [])]) list.add(element);
          //@ts-expect-error
          core.plugin.register(
-            `${options.fallback || 'grakkit'}:${options.name}`,
+            options.fallback || 'grakkit',
             options.name,
-            "",
-            "",
-            list,
+            options.aliases || [],
             options.permission || '',
             options.error || '',
-            options.fallback || 'grakkit',
             (player: obcCommandSender, name: string, args: string[]) => {
                if (options.permission && !player.hasPermission(options.permission)) {
                   options.error && player.sendMessage(options.error);
@@ -268,7 +255,7 @@ export const index = (function () {
          return store[name];
       },
       /** Registers event listeners to the server. */
-      event <X extends keyof events> (name: X, ...listeners: ((event: events[X]) => void)[]) {
+      event<X extends keyof events> (name: X, ...listeners: ((event: events[X]) => void)[]) {
          const store = core.session.event[name] || (core.session.event[name] = []);
          for (const listener of listeners) {
             if (store.push(listener) === 1) {
@@ -475,7 +462,7 @@ export const index = (function () {
          }
       },
       /** Imports a module, prefixed with `@`, or a file relative to the current origin. */
-      import <X extends keyof imports> (source: X) {
+      import<X extends keyof imports> (source: X) {
          if (core.session.stack.length < 64) {
             if (`${source}`[0] === '@') {
                const key = `${source}`.slice(1);
@@ -507,7 +494,9 @@ export const index = (function () {
                const importer = file.file(`../import.${file.name}.${uuid}.grakkit`);
                const exporter = file.file(`../export.${file.name}.${uuid}.grakkit`);
                file.copy(exporter);
-               importer.add().write(`import * as output from '${exporter.name}'; core.session.export.slice(-1)[0](output);`);
+               importer
+                  .add()
+                  .write(`import * as output from '${exporter.name}'; core.session.export.slice(-1)[0](output);`);
                const state = core.session.origin;
                let result: imports[X] = null;
                core.session.origin = file.file('..');
@@ -748,7 +737,7 @@ export const index = (function () {
                            property ? (valid = false) : (body = '');
                            break;
                         default:
-                           if (char.match(/\+-\*\/\^=!&\|\?:\(,;/g)) {
+                           if (char.match(/[\+\-\*\/\^=!&\|\?:\(,;]/g)) {
                               if (!bracket) {
                                  body = input.slice(0, index + 1);
                                  scope = globalThis;
@@ -888,7 +877,12 @@ export const index = (function () {
       /** A set of utility functions for operating on modules, installed or otherwise. */
       module: {
          /** Performs the given action on a module and informs the player on the results. */
-         action (player: obcCommandSender, option: 'add' | 'change' | 'create' | 'remove' | 'update', key: string, version?: string) {
+         action (
+            player: obcCommandSender,
+            option: 'add' | 'change' | 'create' | 'remove' | 'update',
+            key: string,
+            version?: string
+         ) {
             key = key.toLowerCase();
             const action = { add: 'Add', change: 'Chang', create: 'Creat', remove: 'Remov', update: 'Updat' }[option];
             try {
@@ -956,13 +950,14 @@ export const index = (function () {
                throw 'module-already-installed';
             } else {
                const folder = core.root.file('modules', key);
-               folder.file('index.js').add().write("export const Main = {}\n");
+               folder.file('index.js').add().write('export const Main = {}\n');
                core.module.modules[key] = null;
                core.module.dict();
             }
          },
          /** Deletes a module from the server. */
-         delete (key: string, version?: string, dependency?: boolean) {const root = dependency && core.module.dependencies[key];
+         delete (key: string, version?: string, dependency?: boolean) {
+            const root = dependency && core.module.dependencies[key];
             for (const entry of Object.entries(core.module.package(key, version, dependency).dependencies)) {
                let remove = true;
                if (dependency) {
@@ -1186,7 +1181,7 @@ export const index = (function () {
       /** Utility functions for miscellaneous purposes. */
       util: {
          /** A utility function used for recursive operations. */
-         chain <X, Y extends (input: X, chain: (object: X) => ReturnType<Y>) => any> (base: X, modifier: Y) {
+         chain<X, Y extends (input: X, chain: (object: X) => ReturnType<Y>) => any> (base: X, modifier: Y) {
             const chain = (object: X) => modifier(object, chain);
             chain(base);
          },
